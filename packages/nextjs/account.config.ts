@@ -6,7 +6,7 @@ import { AuthType, cookieStorage, createConfig } from "@account-kit/react";
 import { QueryClient } from "@tanstack/react-query";
 import { Chain } from "viem";
 
-const authSections: AuthType[][] = [[{ type: "email" }], [{ type: "social", authProviderId: "google", mode: "popup" }]];
+const authSections: AuthType[][] = [[{ type: "social", authProviderId: "google", mode: "popup" }]];
 
 if (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID) {
   authSections.push([
