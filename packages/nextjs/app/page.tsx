@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useAuthModal } from "@account-kit/react";
 import type { NextPage } from "next";
-import { BugAntIcon } from "@heroicons/react/24/outline";
 import { CounterUI } from "~~/components/counter/CounterUI";
 import { Address } from "~~/components/scaffold-alchemy";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
@@ -62,21 +60,6 @@ const Home: NextPage = () => {
               packages/hardhat/contracts
             </code>
           </p>
-        </div>
-
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </>
