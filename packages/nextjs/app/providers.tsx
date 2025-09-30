@@ -9,7 +9,7 @@ import { ThemeProvider } from "~~/components/ThemeProvider";
 
 export const Providers = (props: PropsWithChildren<{ initialState?: AlchemyClientState }>) => {
   return (
-    <ThemeProvider enableSystem>
+    <ThemeProvider defaultTheme="light" forcedTheme="light" enableSystem={false}>
       <AlchemyAccountProvider config={config} queryClient={queryClient} initialState={props.initialState}>
         <ScaffoldEthAppWithProviders>{props.children}</ScaffoldEthAppWithProviders>
       </AlchemyAccountProvider>

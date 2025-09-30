@@ -20,8 +20,8 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <html suppressHydrationWarning>
-      <body>
+    <html suppressHydrationWarning data-theme="light">
+      <body className="font-apple bg-apple-bg-primary text-apple-text-primary antialiased">
         <Providers initialState={initialState}>{children}</Providers>
       </body>
     </html>

@@ -1,32 +1,53 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root,
-[data-theme] {
-  background: oklch(var(--b2));
-}
-
+/* Essential Apple-style overrides for DaisyUI components */
 body {
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1,
-h2,
-h3,
-h4 {
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-p {
-  margin: 1rem 0;
-}
-
+/* DaisyUI Button overrides for Apple style */
 .btn {
-  @apply shadow-md;
+  @apply font-medium transition-all duration-300 ease-apple;
+  letter-spacing: -0.01em;
+}
+
+.btn:hover {
+  @apply -translate-y-0.5;
 }
 
 .btn.btn-ghost {
   @apply shadow-none;
+}
+
+/* DaisyUI Card overrides */
+.card {
+  @apply transition-all duration-300 ease-apple;
+}
+
+.card:hover {
+  @apply -translate-y-1 shadow-apple-lg;
+}
+
+/* Form element overrides */
+.input, .textarea, .select {
+  @apply transition-all duration-200 ease-apple;
+  font-family: inherit;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  @apply shadow-apple-sm;
+}
+
+/* Modal overrides */
+.modal-backdrop {
+  @apply backdrop-blur-apple;
+}
+
+.modal-box {
+  @apply backdrop-blur-apple-strong shadow-apple-xl;
 }

@@ -66,17 +66,17 @@ const TokenBalanceRow = ({ config, userAddress }: TokenBalanceRowProps) => {
   };
 
   return (
-    <div className="flex justify-between items-center p-5 bg-black/[0.02] rounded-2xl border border-black/[0.04] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-black/[0.04] hover:-translate-y-0.5">
+    <div className="flex justify-between items-center p-5 bg-apple-bg-tertiary rounded-apple-lg border border-apple-border transition-all duration-300 ease-apple hover:bg-apple-bg-hover hover:-translate-y-0.5">
       <div className="flex items-center gap-4">
-        <div className="text-sm font-semibold text-gray-900 tracking-tight min-w-[60px]">{config.symbol}</div>
-        <div className="text-xl font-semibold text-gray-900 tracking-tight">{formattedBalance}</div>
+        <div className="text-sm font-semibold text-apple-text-primary tracking-apple-normal min-w-[60px]">{config.symbol}</div>
+        <div className="text-xl font-semibold text-apple-text-primary tracking-apple-normal">{formattedBalance}</div>
       </div>
       <div className="flex items-center gap-3">
-        <div className={`text-xs font-medium ${config.status === 'eligible' ? 'text-green-500' : 'text-gray-500'}`}>
+        <div className={`text-xs font-medium ${config.status === 'eligible' ? 'text-apple-success' : 'text-apple-text-secondary'}`}>
           {config.statusText}
         </div>
         <button 
-          className="px-4 py-2 bg-black/[0.04] border border-black/[0.08] rounded-lg text-sm font-medium text-gray-900 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-black/[0.08] hover:-translate-y-0.5" 
+          className="px-4 py-2 bg-apple-bg-hover border border-apple-border-hover rounded-apple-sm text-sm font-medium text-apple-text-primary cursor-pointer transition-all duration-200 ease-apple hover:bg-apple-border-hover hover:-translate-y-0.5" 
           onClick={handleTopUp}
         >
           Top Up
@@ -106,15 +106,15 @@ const ETHBalanceRow = ({ userAddress }: { userAddress: `0x${string}` }) => {
   };
 
   return (
-    <div className="flex justify-between items-center p-5 bg-black/[0.02] rounded-2xl border border-black/[0.04] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-black/[0.04] hover:-translate-y-0.5">
+    <div className="flex justify-between items-center p-5 bg-apple-bg-tertiary rounded-apple-lg border border-apple-border transition-all duration-300 ease-apple hover:bg-apple-bg-hover hover:-translate-y-0.5">
       <div className="flex items-center gap-4">
-        <div className="text-sm font-semibold text-gray-900 tracking-tight min-w-[60px]">ETH</div>
-        <div className="text-xl font-semibold text-gray-900 tracking-tight">{formattedBalance}</div>
+        <div className="text-sm font-semibold text-apple-text-primary tracking-apple-normal min-w-[60px]">ETH</div>
+        <div className="text-xl font-semibold text-apple-text-primary tracking-apple-normal">{formattedBalance}</div>
       </div>
       <div className="flex items-center gap-3">
-        <div className="text-xs font-medium text-gray-500">⏳ Coming soon</div>
+        <div className="text-xs font-medium text-apple-text-secondary">⏳ Coming soon</div>
         <button 
-          className="px-4 py-2 bg-black/[0.04] border border-black/[0.08] rounded-lg text-sm font-medium text-gray-900 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-black/[0.08] hover:-translate-y-0.5" 
+          className="px-4 py-2 bg-apple-bg-hover border border-apple-border-hover rounded-apple-sm text-sm font-medium text-apple-text-primary cursor-pointer transition-all duration-200 ease-apple hover:bg-apple-border-hover hover:-translate-y-0.5" 
           onClick={handleTopUp}
         >
           Top Up
@@ -132,9 +132,9 @@ const TokenBalances = () => {
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-black/[0.04] mb-6 shadow-sm">
+    <div className="bg-apple-bg-secondary backdrop-blur-apple rounded-apple-xl p-8 border border-apple-border mb-6 shadow-apple-sm animate-fade-in">
       <div className="flex items-center gap-2 mb-6">
-        <h2 className="text-3xl font-semibold text-gray-900 tracking-tight">💰 Your Token Balances</h2>
+        <h2 className="text-3xl font-semibold text-apple-text-primary tracking-apple-tight">💰 Your Token Balances</h2>
       </div>
       <div className="flex flex-col gap-3 mb-8">
         {TOKEN_CONFIGS.map((config) => (
