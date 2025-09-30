@@ -132,7 +132,7 @@ const TokenBalances = () => {
   }
 
   return (
-    <div className="bg-apple-bg-secondary backdrop-blur-apple rounded-apple-xl p-8 border border-apple-border mb-6 shadow-apple-sm animate-fade-in">
+    <div className="bg-apple-bg-secondary backdrop-blur-apple rounded-apple-xl p-8 border border-apple-border mb-6 shadow-apple-sm animate-fade-in w-full">
       <div className="flex items-center gap-2 mb-6">
         <h2 className="text-3xl font-semibold text-apple-text-primary tracking-apple-tight">💰 Your Token Balances</h2>
       </div>

@@ -48,7 +48,7 @@ export const AddressInfoDropdown = ({
   return (
     <>
       <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-        <summary tabIndex={0} className="btn btn-secondary btn-sm pl-0 pr-2 shadow-md dropdown-toggle gap-0 !h-auto">
+        <summary tabIndex={0} className="btn btn-sm p-2 shadow-md dropdown-toggle gap-0 !h-auto">
           <BlockieAvatar address={checkSumAddress} size={30} ensImage={ensAvatar} />
           <span className="ml-2 mr-1">
             {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
@@ -88,12 +88,6 @@ export const AddressInfoDropdown = ({
                 </div>
               </CopyToClipboard>
             )}
-          </li>
-          <li className={selectingNetwork ? "hidden" : ""}>
-            <label htmlFor="qrcode-modal" className="btn-sm !rounded-xl flex gap-3 py-3">
-              <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
-              <span className="whitespace-nowrap">View QR Code</span>
-            </label>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
             <button className="menu-item btn-sm !rounded-xl flex gap-3 py-3" type="button">
