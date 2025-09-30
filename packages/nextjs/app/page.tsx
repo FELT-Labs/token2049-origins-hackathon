@@ -7,6 +7,7 @@ import { BugAntIcon } from "@heroicons/react/24/outline";
 import { CounterUI } from "~~/components/counter/CounterUI";
 import { Address } from "~~/components/scaffold-alchemy";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
+import TokenBalances from "~~/components/TokenBalances";
 
 const Home: NextPage = () => {
   const { address } = useClient();
@@ -35,9 +36,14 @@ const Home: NextPage = () => {
           </div>
 
           {isConnected && (
-            <div className="mt-8 mb-8">
-              <CounterUI />
-            </div>
+            <>
+              <div className="mt-8 mb-8">
+                <TokenBalances />
+              </div>
+              <div className="mt-8 mb-8">
+                <CounterUI />
+              </div>
+            </>
           )}
 
           <p className="text-center text-lg">
