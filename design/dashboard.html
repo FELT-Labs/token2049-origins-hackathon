@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Fund Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">💰 YieldVault</div>
+            <div class="wallet-section">
+                <div class="wallet-address">0x742d...4B6f</div>
+                <button class="btn btn-secondary">Disconnect</button>
+            </div>
+        </header>
+
+        <!-- Token Balances -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">💰 Your Token Balances</h2>
+            </div>
+            <div class="token-balances-list">
+                <div class="token-balance-row">
+                    <div class="token-info">
+                        <div class="token-symbol">USDC</div>
+                        <div class="token-balance">$524.50</div>
+                    </div>
+                    <div class="token-status">
+                        <div class="token-status-text status-eligible">✅ Eligible for investing</div>
+                        <button class="top-up-btn" onclick="topUpBalance('USDC')">Top Up</button>
+                    </div>
+                </div>
+                
+                <div class="token-balance-row">
+                    <div class="token-info">
+                        <div class="token-symbol">ETH</div>
+                        <div class="token-balance">0.234 ETH</div>
+                    </div>
+                    <div class="token-status">
+                        <div class="token-status-text status-coming-soon">⏳ Coming soon</div>
+                        <button class="top-up-btn" onclick="topUpBalance('ETH')">Top Up</button>
+                    </div>
+                </div>
+                
+                <div class="token-balance-row">
+                    <div class="token-info">
+                        <div class="token-symbol">WBTC</div>
+                        <div class="token-balance">0.0045 BTC</div>
+                    </div>
+                    <div class="token-status">
+                        <div class="token-status-text status-coming-soon">⏳ Coming soon</div>
+                        <button class="top-up-btn" onclick="topUpBalance('WBTC')">Top Up</button>
+                    </div>
+                </div>
+                
+                <div class="token-balance-row">
+                    <div class="token-info">
+                        <div class="token-symbol">DAI</div>
+                        <div class="token-balance">$0.00</div>
+                    </div>
+                    <div class="token-status">
+                        <div class="token-status-text status-coming-soon">⏳ Coming soon</div>
+                        <button class="top-up-btn" onclick="topUpBalance('DAI')">Top Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio Overview -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📊 Your Investments</h2>
+            </div>
+            <div class="portfolio-grid">
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Invested</div>
+                    <div class="stat-value">$750.00</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value">$775.50</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Yield</div>
+                    <div class="stat-value stat-positive">+$25.50 (+3.4%)</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Available to Invest</div>
+                    <div class="stat-value">$524.50 USDC</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Vaults -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">🏦 Investment Vaults</h2>
+                <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
+                    Choose a vault based on the asset you want to optimize for. We handle the investment strategies automatically.
+                </div>
+            </div>
+            
+            <div class="funds-grid">
+                <!-- USDC Vault -->
+                <div class="fund-card">
+                    <div class="fund-header">
+                        <div class="fund-info">
+                            <h3>💵 USDC Vault</h3>
+                            <span class="risk-badge risk-low">Stable Asset</span>
+                        </div>
+                        <div class="fund-metrics">
+                            <div class="metric">
+                                <div class="metric-label">Current Yield</div>
+                                <div class="metric-value text-success">8.2%</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Total Deposits</div>
+                                <div class="metric-value">$4.2M</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-size: 0.875rem; line-height: 1.5;">
+                        <strong>How it works:</strong> Your USDC is automatically deployed across the best DeFi lending protocols and yield farming opportunities. We continuously optimize to maximize your returns while maintaining stability.
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="info-row">
+                            <span class="info-label">Your Position</span>
+                            <span class="info-value">$750.00</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Earned Yield</span>
+                            <span class="info-value text-success">+$25.50</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Current Value</span>
+                            <span class="info-value">$775.50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fund-actions">
+                        <button class="btn btn-primary" onclick="openInvestModal('usdc')">Deposit USDC</button>
+                        <button class="btn btn-secondary" onclick="openWithdrawModal('usdc')">Withdraw</button>
+                    </div>
+                </div>
+
+                <!-- ETH Vault -->
+                <div class="fund-card" style="opacity: 0.6;">
+                    <div class="fund-header">
+                        <div class="fund-info">
+                            <h3>⚡ ETH Vault</h3>
+                            <span class="risk-badge risk-medium">Coming Soon</span>
+                        </div>
+                        <div class="fund-metrics">
+                            <div class="metric">
+                                <div class="metric-label">Target Yield</div>
+                                <div class="metric-value text-warning">~12%</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Status</div>
+                                <div class="metric-value">In Development</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-size: 0.875rem; line-height: 1.5;">
+                        <strong>Coming soon:</strong> Optimize your ETH holdings through staking rewards, DeFi protocols, and yield strategies while maintaining exposure to ETH price appreciation.
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="info-row">
+                            <span class="info-label">Your ETH Balance</span>
+                            <span class="info-value">0.234 ETH</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ready to Invest</span>
+                            <span class="info-value">Yes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fund-actions">
+                        <button class="btn btn-secondary" disabled>Coming Soon</button>
+                        <button class="btn btn-secondary" disabled>Notify Me</button>
+                    </div>
+                </div>
+
+                <!-- BTC Vault -->
+                <div class="fund-card" style="opacity: 0.6;">
+                    <div class="fund-header">
+                        <div class="fund-info">
+                            <h3>₿ Bitcoin Vault</h3>
+                            <span class="risk-badge risk-medium">Coming Soon</span>
+                        </div>
+                        <div class="fund-metrics">
+                            <div class="metric">
+                                <div class="metric-label">Target Yield</div>
+                                <div class="metric-value text-warning">~6%</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Status</div>
+                                <div class="metric-value">In Development</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0; font-size: 0.875rem; line-height: 1.5;">
+                        <strong>Coming soon:</strong> Generate yield on your Bitcoin through wrapped BTC lending and institutional-grade yield strategies while maintaining BTC exposure.
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="info-row">
+                            <span class="info-label">Your WBTC Balance</span>
+                            <span class="info-value">0.0045 BTC</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ready to Invest</span>
+                            <span class="info-value">Yes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fund-actions">
+                        <button class="btn btn-secondary" disabled>Coming Soon</button>
+                        <button class="btn btn-secondary" disabled>Notify Me</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📊 Recent Activity</h2>
+            </div>
+            <div class="info-section">
+                <div class="info-row">
+                    <span class="info-label">Today</span>
+                    <span class="info-value text-success">+$2.15 yield earned</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Yesterday</span>
+                    <span class="info-value text-success">+$2.08 yield earned</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">3 days ago</span>
+                    <span class="info-value">Deposited $200.00 to USDC Vault</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">1 week ago</span>
+                    <span class="info-value">Withdrew $50.00 from USDC Vault</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple modal functions for demo
+        function openInvestModal(fundType) {
+            alert(`Opening investment modal for ${fundType} fund`);
+            // In real implementation, this would open the investment modal
+        }
+
+        function openWithdrawModal(fundType) {
+            alert(`Opening withdrawal modal for ${fundType} fund`);
+            // In real implementation, this would open the withdrawal modal
+        }
+
+        // Demo function for topping up token balances
+        function topUpBalance(token) {
+            const amounts = {
+                'USDC': '$1,000.00',
+                'ETH': '0.5 ETH',
+                'WBTC': '0.01 BTC',
+                'DAI': '$500.00'
+            };
+            
+            alert(`Demo: Added ${amounts[token]} to your ${token} balance!`);
+            
+            // Simulate balance update (in real app, this would update from blockchain)
+            const tokenRows = document.querySelectorAll('.token-balance-row');
+            tokenRows.forEach(row => {
+                const symbol = row.querySelector('.token-symbol').textContent;
+                if (symbol === token) {
+                    const balanceElement = row.querySelector('.token-balance');
+                    const currentBalance = balanceElement.textContent;
+                    
+                    // Simple demo animation
+                    balanceElement.style.transform = 'scale(1.1)';
+                    balanceElement.style.color = '#30d158';
+                    
+                    setTimeout(() => {
+                        balanceElement.style.transform = 'scale(1)';
+                        balanceElement.style.color = '#1d1d1f';
+                    }, 500);
+                }
+            });
+        }
+
+        // Simulate real-time updates
+        function updateYields() {
+            const yieldElements = document.querySelectorAll('.stat-positive');
+            yieldElements.forEach(el => {
+                if (el.textContent.includes('+$')) {
+                    // Simulate small yield increases
+                    const currentValue = parseFloat(el.textContent.match(/\$([0-9.]+)/)[1]);
+                    const newValue = (currentValue + Math.random() * 0.1).toFixed(2);
+                    const percentage = ((newValue / 750) * 100).toFixed(1);
+                    el.textContent = `+$${newValue} (+${percentage}%)`;
+                }
+            });
+        }
+
+        // Update yields every 30 seconds for demo
+        setInterval(updateYields, 30000);
+
+        // Add hover effects to fund cards
+        document.querySelectorAll('.fund-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
+            });
+        });
+    </script>
+</body>
+</html>
+

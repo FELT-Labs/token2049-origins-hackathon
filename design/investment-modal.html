@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Modal - YieldVault</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">💰 YieldVault</div>
+            <div class="wallet-section">
+                <div class="wallet-address">0x742d...4B6f</div>
+                <button class="btn btn-secondary">Disconnect</button>
+            </div>
+        </header>
+
+        <!-- Background Dashboard (blurred) -->
+        <div class="card" style="opacity: 0.5; pointer-events: none;">
+            <div class="card-header">
+                <h2 class="card-title">💼 Your Portfolio</h2>
+            </div>
+            <div class="portfolio-grid">
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value">$1,275.50</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">USDC Balance</div>
+                    <div class="stat-value">$524.50</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Invested</div>
+                    <div class="stat-value">$750.00</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Yield</div>
+                    <div class="stat-value stat-positive">+$25.50 (+3.4%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">💵 Deposit into USDC Vault</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <!-- Vault Information -->
+            <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #4f46e5;">
+                <h4 style="margin-bottom: 1rem; color: #374151;">How USDC Vault Works</h4>
+                <p style="font-size: 0.875rem; line-height: 1.5; color: #6b7280; margin-bottom: 1rem;">
+                    Your USDC is automatically deployed across the best DeFi lending protocols and yield farming opportunities. 
+                    Our algorithms continuously optimize your returns while maintaining stability and minimizing risk.
+                </p>
+                <div style="display: flex; gap: 1rem; font-size: 0.875rem;">
+                    <div>✅ Automatic rebalancing</div>
+                    <div>✅ Risk management</div>
+                    <div>✅ Compound interest</div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-row">
+                    <span class="info-label">Current Yield</span>
+                    <span class="info-value text-success">8.2%</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Asset Type</span>
+                    <span class="info-value">
+                        <span class="risk-badge risk-low">Stable Asset</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total Vault Size</span>
+                    <span class="info-value">$4,200,000</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Your Current Position</span>
+                    <span class="info-value">$775.50</span>
+                </div>
+            </div>
+
+            <!-- Investment Amount -->
+            <div class="form-group">
+                <label class="form-label" for="investAmount">Amount to Invest (USDC)</label>
+                <div class="input-group">
+                    <input 
+                        type="number" 
+                        id="investAmount" 
+                        class="form-input" 
+                        placeholder="0.00" 
+                        min="0" 
+                        max="524.50"
+                        step="0.01"
+                        oninput="updateInvestmentPreview()"
+                    >
+                    <div class="input-addon" onclick="setMaxAmount()">MAX</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Available USDC Balance: <strong>$524.50</strong>
+                </div>
+            </div>
+
+            <!-- Quick Amount Buttons -->
+            <div class="form-group">
+                <label class="form-label">Quick Amounts</label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(50)">$50</button>
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(100)">$100</button>
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(250)">$250</button>
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(500)">$500</button>
+                </div>
+            </div>
+
+            <!-- Investment Preview -->
+            <div class="info-section" id="investmentPreview">
+                <h4 style="margin-bottom: 1rem; color: #374151;">Investment Preview</h4>
+                <div class="info-row">
+                    <span class="info-label">Investment Amount</span>
+                    <span class="info-value" id="previewAmount">$0.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">New Total Position</span>
+                    <span class="info-value" id="previewTotal">$775.50</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Estimated Annual Yield</span>
+                    <span class="info-value text-success" id="previewYield">$0.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Remaining USDC Balance</span>
+                    <span class="info-value" id="previewRemaining">$524.50</span>
+                </div>
+            </div>
+
+            <!-- Transaction Fee Info -->
+            <div class="info-section" style="background: #fef3c7; border: 1px solid #f59e0b;">
+                <div class="info-row">
+                    <span class="info-label">⚠️ Estimated Gas Fee</span>
+                    <span class="info-value">~$2.50</span>
+                </div>
+                <div style="font-size: 0.75rem; color: #92400e; margin-top: 0.5rem;">
+                    Gas fees are paid separately from your investment and may vary based on network conditions.
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirmBtn" onclick="confirmInvestment()" disabled>
+                    Confirm Investment
+                </button>
+            </div>
+
+            <!-- Loading State (hidden by default) -->
+            <div id="loadingState" class="hidden" style="text-align: center; padding: 2rem;">
+                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <div style="margin-top: 1rem; color: #6b7280;">Processing your investment...</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        input:invalid {
+            border-color: #ef4444;
+        }
+        
+        .btn:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .btn:disabled:hover {
+            background: #d1d5db;
+            transform: none;
+        }
+    </style>
+
+    <script>
+        const currentPosition = 775.50;
+        const availableBalance = 524.50;
+        const apy = 0.085; // 8.5%
+
+        function closeModal() {
+            document.querySelector('.modal-overlay').style.display = 'none';
+        }
+
+        function setMaxAmount() {
+            document.getElementById('investAmount').value = availableBalance.toFixed(2);
+            updateInvestmentPreview();
+        }
+
+        function setQuickAmount(amount) {
+            const maxAmount = Math.min(amount, availableBalance);
+            document.getElementById('investAmount').value = maxAmount.toFixed(2);
+            updateInvestmentPreview();
+        }
+
+        function updateInvestmentPreview() {
+            const amountInput = document.getElementById('investAmount');
+            const amount = parseFloat(amountInput.value) || 0;
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            // Update preview values
+            document.getElementById('previewAmount').textContent = `$${amount.toFixed(2)}`;
+            document.getElementById('previewTotal').textContent = `$${(currentPosition + amount).toFixed(2)}`;
+            document.getElementById('previewYield').textContent = `$${(amount * apy).toFixed(2)}`;
+            document.getElementById('previewRemaining').textContent = `$${(availableBalance - amount).toFixed(2)}`;
+
+            // Enable/disable confirm button
+            const isValid = amount > 0 && amount <= availableBalance;
+            confirmBtn.disabled = !isValid;
+
+            // Update input validation styling
+            if (amount > availableBalance) {
+                amountInput.style.borderColor = '#ef4444';
+            } else {
+                amountInput.style.borderColor = amount > 0 ? '#10b981' : '#e5e7eb';
+            }
+        }
+
+        function confirmInvestment() {
+            const amount = parseFloat(document.getElementById('investAmount').value);
+            
+            if (amount <= 0 || amount > availableBalance) {
+                alert('Please enter a valid investment amount.');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.querySelector('.modal').style.opacity = '0.7';
+            document.querySelector('.modal').style.pointerEvents = 'none';
+
+            // Simulate transaction processing
+            setTimeout(() => {
+                alert(`Successfully invested $${amount.toFixed(2)} in USDC Vault!`);
+                closeModal();
+            }, 3000);
+        }
+
+        // Initialize preview on page load
+        updateInvestmentPreview();
+
+        // Handle Enter key in input
+        document.getElementById('investAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('confirmBtn').disabled) {
+                confirmInvestment();
+            }
+        });
+
+        // Handle Escape key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Prevent modal close when clicking inside modal
+        document.querySelector('.modal').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Close modal when clicking outside
+        document.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    </script>
+</body>
+</html>
+

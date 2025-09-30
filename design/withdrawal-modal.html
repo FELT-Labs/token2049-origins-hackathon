@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Modal - YieldVault</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">💰 YieldVault</div>
+            <div class="wallet-section">
+                <div class="wallet-address">0x742d...4B6f</div>
+                <button class="btn btn-secondary">Disconnect</button>
+            </div>
+        </header>
+
+        <!-- Background Dashboard (blurred) -->
+        <div class="card" style="opacity: 0.5; pointer-events: none;">
+            <div class="card-header">
+                <h2 class="card-title">💼 Your Portfolio</h2>
+            </div>
+            <div class="portfolio-grid">
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value">$1,275.50</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">USDC Balance</div>
+                    <div class="stat-value">$524.50</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Invested</div>
+                    <div class="stat-value">$750.00</div>
+                </div>
+                <div class="portfolio-stat">
+                    <div class="stat-label">Total Yield</div>
+                    <div class="stat-value stat-positive">+$25.50 (+3.4%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Modal -->
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">💵 Withdraw from USDC Vault</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <!-- Position Breakdown -->
+            <div class="info-section">
+                <h4 style="margin-bottom: 1rem; color: #374151;">Your Position Breakdown</h4>
+                <div class="info-row">
+                    <span class="info-label">Total Position Value</span>
+                    <span class="info-value">$775.50</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">├ Principal Amount</span>
+                    <span class="info-value">$750.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">└ Earned Yield</span>
+                    <span class="info-value text-success">$25.50</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Current Yield</span>
+                    <span class="info-value text-success">8.2%</span>
+                </div>
+            </div>
+
+            <!-- Withdrawal Options -->
+            <div class="form-group">
+                <label class="form-label">Withdrawal Type</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="withdrawalType" value="yield" checked onchange="updateWithdrawalType()">
+                        <div>
+                            <div style="font-weight: 600;">Withdraw Yield Only</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">
+                                Withdraw earned yield ($25.50) and keep principal invested
+                            </div>
+                        </div>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="withdrawalType" value="partial" onchange="updateWithdrawalType()">
+                        <div>
+                            <div style="font-weight: 600;">Partial Withdrawal</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">
+                                Withdraw a custom amount from your position
+                            </div>
+                        </div>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="withdrawalType" value="full" onchange="updateWithdrawalType()">
+                        <div>
+                            <div style="font-weight: 600;">Full Withdrawal</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">
+                                Withdraw entire position ($775.50) and close vault position
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Custom Amount Input (shown for partial withdrawal) -->
+            <div class="form-group" id="customAmountGroup" style="display: none;">
+                <label class="form-label" for="withdrawAmount">Withdrawal Amount (USDC)</label>
+                <div class="input-group">
+                    <input 
+                        type="number" 
+                        id="withdrawAmount" 
+                        class="form-input" 
+                        placeholder="0.00" 
+                        min="0" 
+                        max="775.50"
+                        step="0.01"
+                        oninput="updateWithdrawalPreview()"
+                    >
+                    <div class="input-addon" onclick="setMaxWithdrawal()">MAX</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.875rem; margin-top: 0.5rem;">
+                    Maximum withdrawal: <strong>$775.50</strong>
+                </div>
+            </div>
+
+            <!-- Quick Amount Buttons (for partial withdrawal) -->
+            <div class="form-group" id="quickAmountGroup" style="display: none;">
+                <label class="form-label">Quick Amounts</label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 80px;" onclick="setQuickWithdrawal(50)">$50</button>
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 80px;" onclick="setQuickWithdrawal(100)">$100</button>
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 80px;" onclick="setQuickWithdrawal(200)">$200</button>
+                    <button class="btn btn-secondary" style="flex: 1; min-width: 80px;" onclick="setQuickWithdrawal(775.50)">ALL</button>
+                </div>
+            </div>
+
+            <!-- Withdrawal Preview -->
+            <div class="info-section" id="withdrawalPreview">
+                <h4 style="margin-bottom: 1rem; color: #374151;">Withdrawal Preview</h4>
+                <div class="info-row">
+                    <span class="info-label">Withdrawal Amount</span>
+                    <span class="info-value text-success" id="previewWithdrawAmount">$25.50</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Remaining Position</span>
+                    <span class="info-value" id="previewRemainingPosition">$750.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">New USDC Balance</span>
+                    <span class="info-value" id="previewNewBalance">$550.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Future Annual Yield</span>
+                    <span class="info-value text-success" id="previewFutureYield">$61.50</span>
+                </div>
+            </div>
+
+            <!-- Impact Warning (shown for full withdrawal) -->
+            <div class="info-section" id="fullWithdrawalWarning" style="background: #fee2e2; border: 1px solid #ef4444; display: none;">
+                <div style="color: #991b1b; font-weight: 600; margin-bottom: 0.5rem;">
+                    ⚠️ Full Withdrawal Impact
+                </div>
+                <div style="font-size: 0.875rem; color: #991b1b;">
+                    You will lose future yield opportunities. Consider partial withdrawal to maintain your position.
+                </div>
+            </div>
+
+            <!-- Transaction Fee Info -->
+            <div class="info-section" style="background: #fef3c7; border: 1px solid #f59e0b;">
+                <div class="info-row">
+                    <span class="info-label">⚠️ Estimated Gas Fee</span>
+                    <span class="info-value">~$1.80</span>
+                </div>
+                <div style="font-size: 0.75rem; color: #92400e; margin-top: 0.5rem;">
+                    Gas fees are deducted separately and may vary based on network conditions.
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-warning" id="confirmBtn" onclick="confirmWithdrawal()">
+                    Confirm Withdrawal
+                </button>
+            </div>
+
+            <!-- Loading State (hidden by default) -->
+            <div id="loadingState" class="hidden" style="text-align: center; padding: 2rem;">
+                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top: 4px solid #f59e0b; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <div style="margin-top: 1rem; color: #6b7280;">Processing your withdrawal...</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        input:invalid {
+            border-color: #ef4444;
+        }
+        
+        .btn:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .btn:disabled:hover {
+            background: #d1d5db;
+            transform: none;
+        }
+        
+        .radio-option:has(input:checked) {
+            border-color: #4f46e5;
+            background: #f0f9ff;
+        }
+    </style>
+
+    <script>
+        const totalPosition = 775.50;
+        const principalAmount = 750.00;
+        const earnedYield = 25.50;
+        const currentBalance = 524.50;
+        const apy = 0.085; // 8.5%
+
+        function closeModal() {
+            document.querySelector('.modal-overlay').style.display = 'none';
+        }
+
+        function updateWithdrawalType() {
+            const selectedType = document.querySelector('input[name="withdrawalType"]:checked').value;
+            const customAmountGroup = document.getElementById('customAmountGroup');
+            const quickAmountGroup = document.getElementById('quickAmountGroup');
+            const fullWithdrawalWarning = document.getElementById('fullWithdrawalWarning');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            // Hide all conditional elements
+            customAmountGroup.style.display = 'none';
+            quickAmountGroup.style.display = 'none';
+            fullWithdrawalWarning.style.display = 'none';
+
+            // Reset amount input
+            document.getElementById('withdrawAmount').value = '';
+
+            // Show relevant elements based on selection
+            switch(selectedType) {
+                case 'yield':
+                    confirmBtn.textContent = 'Withdraw Yield Only';
+                    confirmBtn.className = 'btn btn-success';
+                    break;
+                case 'partial':
+                    customAmountGroup.style.display = 'block';
+                    quickAmountGroup.style.display = 'block';
+                    confirmBtn.textContent = 'Confirm Partial Withdrawal';
+                    confirmBtn.className = 'btn btn-warning';
+                    break;
+                case 'full':
+                    fullWithdrawalWarning.style.display = 'block';
+                    confirmBtn.textContent = 'Confirm Full Withdrawal';
+                    confirmBtn.className = 'btn btn-warning';
+                    break;
+            }
+
+            updateWithdrawalPreview();
+        }
+
+        function setMaxWithdrawal() {
+            document.getElementById('withdrawAmount').value = totalPosition.toFixed(2);
+            updateWithdrawalPreview();
+        }
+
+        function setQuickWithdrawal(amount) {
+            const maxAmount = Math.min(amount, totalPosition);
+            document.getElementById('withdrawAmount').value = maxAmount.toFixed(2);
+            updateWithdrawalPreview();
+        }
+
+        function updateWithdrawalPreview() {
+            const selectedType = document.querySelector('input[name="withdrawalType"]:checked').value;
+            let withdrawAmount = 0;
+
+            switch(selectedType) {
+                case 'yield':
+                    withdrawAmount = earnedYield;
+                    break;
+                case 'partial':
+                    withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+                    break;
+                case 'full':
+                    withdrawAmount = totalPosition;
+                    break;
+            }
+
+            const remainingPosition = Math.max(0, totalPosition - withdrawAmount);
+            const newBalance = currentBalance + withdrawAmount;
+            const futureYield = remainingPosition * apy;
+
+            // Update preview values
+            document.getElementById('previewWithdrawAmount').textContent = `$${withdrawAmount.toFixed(2)}`;
+            document.getElementById('previewRemainingPosition').textContent = `$${remainingPosition.toFixed(2)}`;
+            document.getElementById('previewNewBalance').textContent = `$${newBalance.toFixed(2)}`;
+            document.getElementById('previewFutureYield').textContent = `$${futureYield.toFixed(2)}`;
+
+            // Update button state for partial withdrawals
+            if (selectedType === 'partial') {
+                const confirmBtn = document.getElementById('confirmBtn');
+                const isValid = withdrawAmount > 0 && withdrawAmount <= totalPosition;
+                confirmBtn.disabled = !isValid;
+
+                // Update input validation styling
+                const amountInput = document.getElementById('withdrawAmount');
+                if (withdrawAmount > totalPosition) {
+                    amountInput.style.borderColor = '#ef4444';
+                } else {
+                    amountInput.style.borderColor = withdrawAmount > 0 ? '#10b981' : '#e5e7eb';
+                }
+            } else {
+                document.getElementById('confirmBtn').disabled = false;
+            }
+        }
+
+        function confirmWithdrawal() {
+            const selectedType = document.querySelector('input[name="withdrawalType"]:checked').value;
+            let withdrawAmount = 0;
+            let confirmMessage = '';
+
+            switch(selectedType) {
+                case 'yield':
+                    withdrawAmount = earnedYield;
+                    confirmMessage = `withdraw $${withdrawAmount.toFixed(2)} in earned yield`;
+                    break;
+                case 'partial':
+                    withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
+                    if (withdrawAmount <= 0 || withdrawAmount > totalPosition) {
+                        alert('Please enter a valid withdrawal amount.');
+                        return;
+                    }
+                    confirmMessage = `withdraw $${withdrawAmount.toFixed(2)} from your position`;
+                    break;
+                case 'full':
+                    withdrawAmount = totalPosition;
+                    confirmMessage = `withdraw your entire position of $${withdrawAmount.toFixed(2)}`;
+                    break;
+            }
+
+            if (!confirm(`Are you sure you want to ${confirmMessage}?`)) {
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.querySelector('.modal').style.opacity = '0.7';
+            document.querySelector('.modal').style.pointerEvents = 'none';
+
+            // Simulate transaction processing
+            setTimeout(() => {
+                alert(`Successfully withdrew $${withdrawAmount.toFixed(2)} from USDC Vault!`);
+                closeModal();
+            }, 3000);
+        }
+
+        // Initialize on page load
+        updateWithdrawalType();
+
+        // Handle Enter key in input
+        document.getElementById('withdrawAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('confirmBtn').disabled) {
+                confirmWithdrawal();
+            }
+        });
+
+        // Handle Escape key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Prevent modal close when clicking inside modal
+        document.querySelector('.modal').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Close modal when clicking outside
+        document.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    </script>
+</body>
+</html>
+
