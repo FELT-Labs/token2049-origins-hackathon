@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatUnits, parseAbi } from "viem";
-import { useReadContract } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 import { useWatchBalance } from "~~/hooks/scaffold-alchemy/useWatchBalance";
+import { useAccountType } from "~~/hooks/useAccountType";
 
 // ERC20 ABI for balanceOf function
 const ERC20_ABI = parseAbi(["function balanceOf(address owner) view returns (uint256)"]);
@@ -117,17 +118,72 @@ export interface TokenData extends TokenConfig {
   vaultStatus: "active" | "coming-soon";
 }
 
+// Simplified Account Kit balance hook
+const useAccountKitBalance = (config: TokenConfig, userAddress: `0x${string}` | undefined, client: any) => {
+  const [balance, setBalance] = useState<bigint | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    if (!client || !userAddress) {
+      setBalance(BigInt(0));
+      setIsLoading(false);
+      setIsError(false);
+      return;
+    }
+
+    const fetchBalance = async () => {
+      setIsLoading(true);
+      setIsError(false);
+
+      try {
+        let result;
+        if (config.symbol === "ETH") {
+          result = await client.getBalance({ address: userAddress });
+        } else {
+          result = await client.readContract({
+            address: config.address,
+            abi: ERC20_ABI,
+            functionName: "balanceOf",
+            args: [userAddress],
+          });
+        }
+        // Treat undefined/null as 0 balance
+        setBalance(result || BigInt(0));
+      } catch (error) {
+        console.error(`❌ Balance error for ${config.symbol}:`, error);
+        setIsError(true);
+        setBalance(BigInt(0));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBalance();
+  }, [client, userAddress, config.address, config.symbol]);
+
+  return { data: balance, isLoading, isError };
+};
+
 const useIndividualTokenBalance = (config: TokenConfig, userAddress: `0x${string}` | undefined) => {
-  // Handle ETH balance separately
+  const { client } = useClient();
+  const accountTypeInfo = useAccountType();
+
+  // Use Account Kit client for Smart Accounts
+  const accountKitBalance = useAccountKitBalance(config, userAddress, accountTypeInfo.isAccountKit ? client : null);
+
+  // Use Wagmi hooks for EOA
   const {
     data: ethBalance,
     isLoading: ethLoading,
     isError: ethError,
   } = useWatchBalance({
     address: userAddress,
+    query: {
+      enabled: !!userAddress && !accountTypeInfo.isAccountKit,
+    },
   });
 
-  // Handle ERC20 token balances
   const {
     data: tokenBalance,
     isLoading: tokenLoading,
@@ -138,14 +194,29 @@ const useIndividualTokenBalance = (config: TokenConfig, userAddress: `0x${string
     functionName: "balanceOf",
     args: userAddress ? [userAddress] : undefined,
     query: {
-      enabled: !!userAddress && config.symbol !== "ETH",
+      enabled: !!userAddress && config.symbol !== "ETH" && !accountTypeInfo.isAccountKit,
     },
   });
 
   return useMemo(() => {
-    const isLoading = config.symbol === "ETH" ? ethLoading : tokenLoading;
-    const isError = config.symbol === "ETH" ? ethError : tokenError;
-    const balance = config.symbol === "ETH" ? ethBalance?.value : tokenBalance;
+    // Choose data source based on account type
+    const isLoading = accountTypeInfo.isAccountKit
+      ? accountKitBalance.isLoading
+      : config.symbol === "ETH"
+        ? ethLoading
+        : tokenLoading;
+
+    const isError = accountTypeInfo.isAccountKit
+      ? accountKitBalance.isError
+      : config.symbol === "ETH"
+        ? ethError
+        : tokenError;
+
+    const balance = accountTypeInfo.isAccountKit
+      ? accountKitBalance.data
+      : config.symbol === "ETH"
+        ? ethBalance?.value
+        : tokenBalance;
 
     if (isLoading) {
       return {
@@ -158,7 +229,7 @@ const useIndividualTokenBalance = (config: TokenConfig, userAddress: `0x${string
       };
     }
 
-    if (isError || !balance) {
+    if (isError) {
       return {
         symbol: config.symbol,
         balance: "0",
@@ -169,7 +240,9 @@ const useIndividualTokenBalance = (config: TokenConfig, userAddress: `0x${string
       };
     }
 
-    const formatted = formatUnits(balance, config.decimals);
+    // Treat undefined/null balance as 0
+    const actualBalance = balance || BigInt(0);
+    const formatted = formatUnits(actualBalance, config.decimals);
     const numBalance = parseFloat(formatted);
 
     // Mock USD conversion rates for demo
@@ -190,16 +263,42 @@ const useIndividualTokenBalance = (config: TokenConfig, userAddress: `0x${string
       isLoading: false,
       isError: false,
     };
-  }, [config.symbol, config.decimals, ethBalance, ethError, ethLoading, tokenBalance, tokenError, tokenLoading]);
+  }, [
+    config.symbol,
+    config.decimals,
+    accountTypeInfo.isAccountKit,
+    accountKitBalance.data,
+    accountKitBalance.isLoading,
+    accountKitBalance.isError,
+    ethBalance,
+    ethError,
+    ethLoading,
+    tokenBalance,
+    tokenError,
+    tokenLoading,
+  ]);
 };
 
 export const useTokenData = () => {
-  const { address } = useClient();
+  const { address: accountKitAddress } = useClient();
+  const { address: wagmiAddress } = useAccount();
+  const accountTypeInfo = useAccountType();
+
+  // Use the appropriate address based on account type
+  const userAddress = useMemo(() => {
+    if (accountTypeInfo.isAccountKit && accountKitAddress) {
+      return accountKitAddress;
+    }
+    if (accountTypeInfo.isEOA && wagmiAddress) {
+      return wagmiAddress;
+    }
+    return accountKitAddress || wagmiAddress;
+  }, [accountTypeInfo.isAccountKit, accountTypeInfo.isEOA, accountKitAddress, wagmiAddress]);
 
   // Get all token balances using hooks (must be called at top level)
-  const usdcBalance = useIndividualTokenBalance(TOKEN_CONFIGS[0], address as `0x${string}` | undefined);
-  const ethBalance = useIndividualTokenBalance(TOKEN_CONFIGS[1], address as `0x${string}` | undefined);
-  const btcBalance = useIndividualTokenBalance(TOKEN_CONFIGS[2], address as `0x${string}` | undefined);
+  const usdcBalance = useIndividualTokenBalance(TOKEN_CONFIGS[0], userAddress as `0x${string}` | undefined);
+  const ethBalance = useIndividualTokenBalance(TOKEN_CONFIGS[1], userAddress as `0x${string}` | undefined);
+  const btcBalance = useIndividualTokenBalance(TOKEN_CONFIGS[2], userAddress as `0x${string}` | undefined);
 
   const tokenData = useMemo(() => {
     const balances = [usdcBalance, ethBalance, btcBalance];
@@ -299,19 +398,32 @@ export const useTokenData = () => {
     getTotalYield,
     simulateInvestment,
     simulateWithdrawal,
-    isConnected: !!address,
-    userAddress: address,
+    isConnected: !!userAddress,
+    userAddress: userAddress,
   };
 };
 
 // Individual token balance hook for components that need real-time balance updates
 export const useTokenBalance = (symbol: string) => {
-  const { address } = useClient();
+  const { address: accountKitAddress } = useClient();
+  const { address: wagmiAddress } = useAccount();
+  const accountTypeInfo = useAccountType();
+
+  const userAddress = useMemo(() => {
+    if (accountTypeInfo.isAccountKit && accountKitAddress) {
+      return accountKitAddress;
+    }
+    if (accountTypeInfo.isEOA && wagmiAddress) {
+      return wagmiAddress;
+    }
+    return accountKitAddress || wagmiAddress;
+  }, [accountTypeInfo.isAccountKit, accountTypeInfo.isEOA, accountKitAddress, wagmiAddress]);
+
   const config = TOKEN_CONFIGS.find(c => c.symbol === symbol);
 
   if (!config) {
     throw new Error(`Token configuration not found for symbol: ${symbol}`);
   }
 
-  return useIndividualTokenBalance(config, address as `0x${string}` | undefined);
+  return useIndividualTokenBalance(config, userAddress as `0x${string}` | undefined);
 };
