@@ -4,7 +4,6 @@ import { useAuthModal } from "@account-kit/react";
 import type { NextPage } from "next";
 import TokenBalances from "~~/components/TokenBalances";
 import TokenVaults from "~~/components/TokenVaults";
-import { CounterUI } from "~~/components/counter/CounterUI";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 
 const Home: NextPage = () => {
