@@ -20,9 +20,9 @@ export const ConnectButton = () => {
 
   if (!connected) {
     return (
-      <button 
-        className="px-6 py-3 bg-apple-text-primary text-white font-medium rounded-apple-md transition-all duration-300 ease-apple hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-apple-md text-sm" 
-        onClick={openAuthModal} 
+      <button
+        className="px-6 py-3 bg-apple-text-primary text-white font-medium rounded-apple-md transition-all duration-300 ease-apple hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-apple-md text-sm"
+        onClick={openAuthModal}
         type="button"
       >
         Login

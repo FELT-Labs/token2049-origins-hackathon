@@ -6,8 +6,7 @@ import WithdrawalModal from "./WithdrawalModal";
 import { useTokenData, type TokenData } from "~~/hooks/useTokenData";
 
 const TokenVaults = () => {
-  const { tokenData, isConnected } = useTokenData();
-  const [selectedVault, setSelectedVault] = useState<string | null>(null);
+  const { tokenData } = useTokenData();
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
   const [selectedVaultForInvestment, setSelectedVaultForInvestment] = useState<TokenData | null>(null);
   const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
@@ -94,8 +93,6 @@ const TokenVaults = () => {
               className={`bg-white rounded-xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
                 vault.vaultStatus === "coming-soon" ? "opacity-60" : ""
               }`}
-              onMouseEnter={() => setSelectedVault(vault.vaultId)}
-              onMouseLeave={() => setSelectedVault(null)}
             >
               {/* Vault Header */}
               <div className="flex justify-between items-start mb-4">

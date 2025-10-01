@@ -11,7 +11,6 @@ import {
   CheckCircleIcon,
   ChevronDownIcon,
   DocumentDuplicateIcon,
-  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 import { BlockieAvatar, isENS } from "~~/components/scaffold-alchemy";
 import { useOutsideClick } from "~~/hooks/scaffold-alchemy";
