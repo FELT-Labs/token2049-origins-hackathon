@@ -175,6 +175,34 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
 
   if (!isOpen || !vault) return null;
 
+  // Additional safeguard: Don't render modal if no position available
+  if (totalPosition <= 0) {
+    return (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+        onClick={onClose}
+      >
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="text-center">
+            <div className="text-6xl mb-4">📊</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No Position to Withdraw
+            </h3>
+            <p className="text-gray-600 mb-6">
+              You don't have any position in this vault to withdraw. Please invest first to build a position.
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full bg-blue-600 text-white font-medium py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"

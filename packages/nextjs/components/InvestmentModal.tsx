@@ -273,6 +273,34 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
 
   if (!isOpen || !vault) return null;
 
+  // Additional safeguard: Don't render modal if no balance available
+  if (availableBalance <= 0) {
+    return (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+        onClick={onClose}
+      >
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+          <div className="text-center">
+            <div className="text-6xl mb-4">💰</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No {vault.symbol} Balance
+            </h3>
+            <p className="text-gray-600 mb-6">
+              You need {vault.symbol} tokens to invest in this vault. Please acquire some {vault.symbol} first.
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full bg-blue-600 text-white font-medium py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
