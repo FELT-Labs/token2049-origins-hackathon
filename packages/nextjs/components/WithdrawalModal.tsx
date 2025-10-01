@@ -325,7 +325,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
           )}
 
           {/* Transaction Fee Info */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+          {/* <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-yellow-800 font-medium">⚠️ Estimated Gas Fee</span>
               <span className="font-semibold text-yellow-900">~$1.80</span>
@@ -333,7 +333,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
             <div className="text-xs text-yellow-700">
               Gas fees are deducted separately and may vary based on network conditions.
             </div>
-          </div>
+          </div> */}
 
           {/* Action Buttons */}
           <div className="flex gap-3">
