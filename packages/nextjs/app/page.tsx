@@ -3,6 +3,7 @@
 import { useAuthModal } from "@account-kit/react";
 import type { NextPage } from "next";
 import TokenBalances from "~~/components/TokenBalances";
+import TokenVaults from "~~/components/TokenVaults";
 import { CounterUI } from "~~/components/counter/CounterUI";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 
@@ -35,17 +36,12 @@ const Home: NextPage = () => {
               </div>
             </>
           ) : (
-            <>
-              <div className="mb-8">
-                <TokenBalances />
-              </div>
-              <div className="mb-8">
-                <CounterUI />
-              </div>
-            </>
+            <div className="flex flex-col gap-8">
+              <CounterUI />
+              <TokenBalances />
+              <TokenVaults />
+            </div>
           )}
-
-          
         </div>
       </div>
     </>
