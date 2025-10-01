@@ -7,8 +7,8 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-alchemy/getMetadata";
 
 export const metadata = getMetadata({
-  title: "Scaffold-Alchemy App",
-  description: "Built with 🏗 Scaffold-Alchemy",
+  title: "YieldVault - Your crypto savings account",
+  description: "Professional-grade DeFi investment platform with automated yield optimization strategies.",
 });
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
