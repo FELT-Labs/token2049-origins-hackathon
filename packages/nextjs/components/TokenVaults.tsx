@@ -3,7 +3,7 @@
 import { useState } from "react";
 import InvestmentModal from "./InvestmentModal";
 import WithdrawalModal from "./WithdrawalModal";
-import { useTokenData, type TokenData } from "~~/hooks/useTokenData";
+import { type TokenData, useTokenData } from "~~/hooks/useTokenData";
 
 const TokenVaults = () => {
   const { tokenData } = useTokenData();
@@ -42,7 +42,7 @@ const TokenVaults = () => {
     if (status === "coming-soon") {
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
     }
-    
+
     switch (riskLevel) {
       case "low":
         return "bg-green-100 text-green-800 border-green-200";
@@ -59,7 +59,7 @@ const TokenVaults = () => {
     if (vault.vaultStatus === "coming-soon") {
       return "Coming Soon";
     }
-    
+
     switch (vault.riskLevel) {
       case "low":
         return "Stable Asset";
@@ -77,17 +77,16 @@ const TokenVaults = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            🏦 Investment Vaults
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">🏦 Investment Vaults</h2>
           <p className="text-sm text-gray-600">
-            Choose a vault based on the asset you want to optimize for. We handle the investment strategies automatically.
+            Choose a vault based on the asset you want to optimize for. We handle the investment strategies
+            automatically.
           </p>
         </div>
 
         {/* Vaults Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tokenData.map((vault) => (
+          {tokenData.map(vault => (
             <div
               key={vault.vaultId}
               className={`bg-white rounded-xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
@@ -103,7 +102,7 @@ const TokenVaults = () => {
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRiskBadgeStyles(
                       vault.riskLevel,
-                      vault.vaultStatus
+                      vault.vaultStatus,
                     )}`}
                   >
                     {getRiskBadgeText(vault)}
@@ -117,9 +116,11 @@ const TokenVaults = () => {
                   <div className="text-xs text-gray-500 mb-1">
                     {vault.vaultStatus === "active" ? "Current Yield" : "Target Yield"}
                   </div>
-                  <div className={`text-sm font-semibold ${
-                    vault.vaultStatus === "active" ? "text-green-600" : "text-yellow-600"
-                  }`}>
+                  <div
+                    className={`text-sm font-semibold ${
+                      vault.vaultStatus === "active" ? "text-green-600" : "text-yellow-600"
+                    }`}
+                  >
                     {vault.vaultStatus === "active" ? vault.currentYield : vault.targetYield}
                   </div>
                 </div>
@@ -127,22 +128,17 @@ const TokenVaults = () => {
                   <div className="text-xs text-gray-500 mb-1">
                     {vault.vaultStatus === "active" ? "Total Deposits" : "Status"}
                   </div>
-                  <div className="text-sm font-semibold text-gray-900">
-                    {vault.totalDeposits}
-                  </div>
+                  <div className="text-sm font-semibold text-gray-900">{vault.totalDeposits}</div>
                 </div>
               </div>
 
               {/* Description */}
-              <div className={`p-3 rounded-lg mb-4 text-xs leading-relaxed ${
-                vault.vaultStatus === "active" 
-                  ? "bg-blue-50 text-blue-800" 
-                  : "bg-yellow-50 text-yellow-800"
-              }`}>
-                <strong>
-                  {vault.vaultStatus === "active" ? "How it works:" : "Coming soon:"}
-                </strong>{" "}
-                {vault.description}
+              <div
+                className={`p-3 rounded-lg mb-4 text-xs leading-relaxed ${
+                  vault.vaultStatus === "active" ? "bg-blue-50 text-blue-800" : "bg-yellow-50 text-yellow-800"
+                }`}
+              >
+                <strong>{vault.vaultStatus === "active" ? "How it works:" : "Coming soon:"}</strong> {vault.description}
               </div>
 
               {/* Position Info */}
@@ -155,20 +151,16 @@ const TokenVaults = () => {
                     {vault.vaultStatus === "active" ? vault.position.investedFormatted : vault.balance.balanceFormatted}
                   </span>
                 </div>
-                
+
                 {vault.vaultStatus === "active" && (
                   <>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Earned Yield</span>
-                      <span className="text-sm font-medium text-green-600">
-                        {vault.position.earnedYieldFormatted}
-                      </span>
+                      <span className="text-sm font-medium text-green-600">{vault.position.earnedYieldFormatted}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-500">Current Value</span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {vault.position.currentValueFormatted}
-                      </span>
+                      <span className="text-sm font-medium text-gray-900">{vault.position.currentValueFormatted}</span>
                     </div>
                   </>
                 )}
@@ -176,9 +168,7 @@ const TokenVaults = () => {
                 {vault.vaultStatus === "coming-soon" && (
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">Ready to Invest</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      Ready to Invest
-                    </span>
+                    <span className="text-sm font-medium text-gray-900">Ready to Invest</span>
                   </div>
                 )}
               </div>

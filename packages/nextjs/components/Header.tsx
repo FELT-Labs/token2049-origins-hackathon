@@ -55,7 +55,9 @@ export const Header = () => {
       <div className="flex items-center w-1/2">
         <Link href="/" passHref className="flex items-center gap-3 ml-4 mr-6 shrink-0">
           <div className="flex flex-col">
-            <span className="text-xl font-semibold leading-tight text-apple-text-primary tracking-apple-tight">💰 YieldVault</span>
+            <span className="text-xl font-semibold leading-tight text-apple-text-primary tracking-apple-tight">
+              💰 YieldVault
+            </span>
             <span className="text-xs text-apple-text-secondary">Investment Platform</span>
           </div>
         </Link>

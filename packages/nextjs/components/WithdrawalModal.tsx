@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { parseUnits } from "viem";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { type TokenData } from "~~/hooks/useTokenData";
-import { useScaffoldWriteContract, useDeployedContractInfo } from "~~/hooks/scaffold-alchemy";
-import { useAccountType } from "~~/hooks/useAccountType";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useDeployedContractInfo, useScaffoldWriteContract } from "~~/hooks/scaffold-alchemy";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
+import { useAccountType } from "~~/hooks/useAccountType";
+import { type TokenData } from "~~/hooks/useTokenData";
 import { useVault } from "~~/hooks/useVault";
 
 interface WithdrawalModalProps {
@@ -82,7 +82,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
     }
 
     const withdrawAmount = (totalPosition * withdrawalPercentage) / 100;
-    let confirmMessage = '';
+    let confirmMessage = "";
 
     if (withdrawalPercentage === 100) {
       confirmMessage = `withdraw your entire position of $${withdrawAmount.toFixed(2)} (100%)`;
@@ -178,16 +178,11 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
   // Additional safeguard: Don't render modal if no position available
   if (totalPosition <= 0) {
     return (
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-        onClick={onClose}
-      >
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={onClose}>
         <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
           <div className="text-center">
             <div className="text-6xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Position to Withdraw
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Position to Withdraw</h3>
             <p className="text-gray-600 mb-6">
               You do not have any position in this vault to withdraw. Please invest first to build a position.
             </p>
@@ -204,21 +199,19 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       onClick={onClose}
       onKeyDown={handleEscapeKey}
       tabIndex={-1}
     >
-      <div 
+      <div
         className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            💵 Withdraw from {vault.name}
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-900">💵 Withdraw from {vault.name}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl font-light w-8 h-8 flex items-center justify-center"
@@ -254,7 +247,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
           {/* Percentage Slider */}
           <div className="mb-6">
             <h4 className="font-semibold text-gray-900 mb-4">Select Withdrawal Percentage</h4>
-            
+
             {/* Percentage Display */}
             <div className="text-center mb-6">
               <div className="text-4xl font-bold text-blue-600 mb-2">{withdrawalPercentage}%</div>
@@ -270,11 +263,11 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
                 min="0"
                 max="100"
                 value={withdrawalPercentage}
-                onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                onChange={e => handleSliderChange(parseInt(e.target.value))}
                 onKeyPress={handleKeyPress}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 style={{
-                  background: `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${withdrawalPercentage}%, #e5e7eb ${withdrawalPercentage}%, #e5e7eb 100%)`
+                  background: `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${withdrawalPercentage}%, #e5e7eb ${withdrawalPercentage}%, #e5e7eb 100%)`,
                 }}
               />
             </div>
@@ -323,9 +316,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
           {/* Full Withdrawal Warning */}
           {withdrawalPercentage === 100 && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-              <div className="text-red-800 font-semibold mb-2">
-                ⚠️ Full Withdrawal Impact
-              </div>
+              <div className="text-red-800 font-semibold mb-2">⚠️ Full Withdrawal Impact</div>
               <div className="text-sm text-red-700">
                 You will lose future yield opportunities. Consider partial withdrawal to maintain your position.
               </div>
@@ -367,9 +358,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
                 <div className="inline-block w-10 h-10 border-4 border-gray-200 border-t-yellow-600 rounded-full animate-spin mb-4"></div>
                 <div className="text-gray-600">Processing your withdrawal...</div>
                 {accountTypeInfo.isEOA && (
-                  <div className="text-sm text-gray-500 mt-2">
-                    Please confirm the transaction in your wallet
-                  </div>
+                  <div className="text-sm text-gray-500 mt-2">Please confirm the transaction in your wallet</div>
                 )}
               </div>
             </div>
@@ -389,7 +378,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
           border: 2px solid #ffffff;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .slider::-moz-range-thumb {
           width: 20px;
           height: 20px;

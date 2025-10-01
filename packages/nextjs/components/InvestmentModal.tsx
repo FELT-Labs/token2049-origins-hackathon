@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { parseUnits, formatUnits } from "viem";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { type TokenData } from "~~/hooks/useTokenData";
-import { useScaffoldReadContract, useScaffoldWriteContract, useDeployedContractInfo } from "~~/hooks/scaffold-alchemy";
-import { useAccountType } from "~~/hooks/useAccountType";
+import { useEffect, useState } from "react";
+import { formatUnits, parseUnits } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-alchemy";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
+import { useAccountType } from "~~/hooks/useAccountType";
+import { type TokenData } from "~~/hooks/useTokenData";
 
 interface InvestmentModalProps {
   isOpen: boolean;
@@ -276,16 +276,11 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
   // Additional safeguard: Don't render modal if no balance available
   if (availableBalance <= 0) {
     return (
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-        onClick={onClose}
-      >
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={onClose}>
         <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
           <div className="text-center">
             <div className="text-6xl mb-4">💰</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No {vault.symbol} Balance
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No {vault.symbol} Balance</h3>
             <p className="text-gray-600 mb-6">
               You need {vault.symbol} tokens to invest in this vault. Please acquire some {vault.symbol} first.
             </p>
@@ -302,15 +297,15 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       onClick={onClose}
       onKeyDown={handleEscapeKey}
       tabIndex={-1}
     >
-      <div 
+      <div
         className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
@@ -329,9 +324,7 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
           {/* Vault Information */}
           <div className="bg-blue-50 p-6 rounded-xl mb-6 border-l-4 border-blue-500">
             <h4 className="font-semibold text-gray-900 mb-3">How {vault.name} Works</h4>
-            <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-              {vault.description}
-            </p>
+            <p className="text-sm text-gray-700 mb-4 leading-relaxed">{vault.description}</p>
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center text-green-700">
                 <span className="mr-1">✅</span>
@@ -357,7 +350,9 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Asset Type</span>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRiskBadgeStyles(vault.riskLevel)}`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRiskBadgeStyles(vault.riskLevel)}`}
+                >
                   {getRiskBadgeText(vault.riskLevel)}
                 </span>
               </div>
@@ -382,14 +377,18 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
                 type="number"
                 id="investAmount"
                 value={investAmount}
-                onChange={(e) => handleAmountChange(e.target.value)}
+                onChange={e => handleAmountChange(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="0.00"
                 min="0"
                 max={availableBalance}
                 step="0.01"
                 className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                  investmentAmount > availableBalance ? "border-red-300" : investmentAmount > 0 ? "border-green-300" : "border-gray-300"
+                  investmentAmount > availableBalance
+                    ? "border-red-300"
+                    : investmentAmount > 0
+                      ? "border-green-300"
+                      : "border-gray-300"
                 }`}
               />
               <button
@@ -406,19 +405,17 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
 
           {/* Portfolio Percentage Slider */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Portfolio Percentage
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Portfolio Percentage</label>
             <div className="space-y-3">
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={portfolioPercentage}
-                onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                onChange={e => handleSliderChange(parseInt(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 style={{
-                  background: `linear-gradient(to right, #e5e7eb 0%, #4f46e5 ${portfolioPercentage}%, #e5e7eb ${portfolioPercentage}%)`
+                  background: `linear-gradient(to right, #e5e7eb 0%, #4f46e5 ${portfolioPercentage}%, #e5e7eb ${portfolioPercentage}%)`,
                 }}
               />
               <div className="flex justify-between text-xs text-gray-500">
@@ -485,7 +482,13 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
             >
-              {txStep === "approving" ? "Approving USDC..." : txStep === "depositing" ? "Depositing..." : isConfirming ? "Confirming..." : "Confirm Investment"}
+              {txStep === "approving"
+                ? "Approving USDC..."
+                : txStep === "depositing"
+                  ? "Depositing..."
+                  : isConfirming
+                    ? "Confirming..."
+                    : "Confirm Investment"}
             </button>
           </div>
 
@@ -495,12 +498,14 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
               <div className="bg-white rounded-xl p-8 text-center">
                 <div className="inline-block w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
                 <div className="text-gray-600">
-                  {txStep === "approving" ? "Approving USDC spending..." : txStep === "depositing" ? "Depositing into vault..." : "Processing your investment..."}
+                  {txStep === "approving"
+                    ? "Approving USDC spending..."
+                    : txStep === "depositing"
+                      ? "Depositing into vault..."
+                      : "Processing your investment..."}
                 </div>
                 {accountTypeInfo.isEOA && (
-                  <div className="text-sm text-gray-500 mt-2">
-                    Please confirm the transaction in your wallet
-                  </div>
+                  <div className="text-sm text-gray-500 mt-2">Please confirm the transaction in your wallet</div>
                 )}
               </div>
             </div>
@@ -520,7 +525,7 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
           border: 2px solid #ffffff;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .slider::-moz-range-thumb {
           width: 20px;
           height: 20px;
