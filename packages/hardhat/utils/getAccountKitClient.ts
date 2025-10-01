@@ -5,7 +5,7 @@ import { LocalAccountSigner } from "@aa-sdk/core";
 import type { Hex, Chain } from "viem";
 import { gasPolicyId, hardhatAccount0PrivateKey, providerApiKey } from "../hardhat.config";
 
-const signingKey = (process.env.SIGNING_KEY || hardhatAccount0PrivateKey) as Hex;
+const signingKey = (process.env.PRIVATE_KEY || hardhatAccount0PrivateKey) as Hex;
 
 const alchemyTransport = alchemy({
   apiKey: providerApiKey,

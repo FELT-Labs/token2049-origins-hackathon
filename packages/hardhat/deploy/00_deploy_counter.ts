@@ -1,22 +1,44 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { deployWithAA } from "../utils/deployWithAA";
 
 /**
- * Deploys a contract named "Counter" using a smart account associated to SIGNING_KEY, if provided,
- * or else a random signing key will be used
+ * Deploys a contract named "Counter" using private key from .env
  *
  * @param hre HardhatRuntimeEnvironment object.
  */
 export const CONTRACT_NAME = "Counter";
 const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const factory = await hre.ethers.getContractFactory(CONTRACT_NAME);
+  const { deployments, getNamedAccounts } = hre;
+  const { deploy } = deployments;
 
-  // use account abstraction to deploy the contract, with the gas sponsored for us!
-  const counterAddress = await deployWithAA(factory, CONTRACT_NAME, hre, [3]);
+  // Get deployer from private key or use default
+  const privateKey = process.env.PRIVATE_KEY;
+  let deployer: string;
 
-  const counter = await hre.ethers.getContractAt(CONTRACT_NAME, counterAddress);
+  if (privateKey) {
+    const deployerSigner = new hre.ethers.Wallet(privateKey, hre.ethers.provider);
+    deployer = deployerSigner.address;
+    console.log("🔑 Using private key deployment");
+    console.log("📍 Deployer address:", deployer);
+  } else {
+    const { deployer: namedDeployer } = await getNamedAccounts();
+    deployer = namedDeployer;
+    console.log("🏠 Using default Hardhat signer");
+  }
+
+  console.log(`📦 Deploying ${CONTRACT_NAME}...`);
+
+  // Deploy the Counter contract
+  const counterDeployment = await deploy(CONTRACT_NAME, {
+    from: deployer,
+    args: [3], // Initial value for x
+    log: true,
+    waitConfirmations: 1,
+  });
+
+  const counter = await hre.ethers.getContractAt(CONTRACT_NAME, counterDeployment.address);
   console.log("👋 Initial value of x:", await counter.x());
+  console.log("✅ Counter deployed at:", counterDeployment.address);
 };
 
 export default deployYourContract;

@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
           // not really necessary since we're using AA
           // however, without this, hardhat will make a call out to eth_accounts
           // which may not be supported for some networks
-          accounts: [hardhatAccount0PrivateKey],
+          accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [hardhatAccount0PrivateKey],
         },
       ]),
     ),
