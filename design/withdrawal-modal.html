@@ -73,40 +73,6 @@
                 </div>
             </div>
 
-            <!-- Withdrawal Options -->
-            <div class="form-group">
-                <label class="form-label">Withdrawal Type</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="withdrawalType" value="yield" checked onchange="updateWithdrawalType()">
-                        <div>
-                            <div style="font-weight: 600;">Withdraw Yield Only</div>
-                            <div style="font-size: 0.875rem; color: #6b7280;">
-                                Withdraw earned yield ($25.50) and keep principal invested
-                            </div>
-                        </div>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="withdrawalType" value="partial" onchange="updateWithdrawalType()">
-                        <div>
-                            <div style="font-weight: 600;">Partial Withdrawal</div>
-                            <div style="font-size: 0.875rem; color: #6b7280;">
-                                Withdraw a custom amount from your position
-                            </div>
-                        </div>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="withdrawalType" value="full" onchange="updateWithdrawalType()">
-                        <div>
-                            <div style="font-weight: 600;">Full Withdrawal</div>
-                            <div style="font-size: 0.875rem; color: #6b7280;">
-                                Withdraw entire position ($775.50) and close vault position
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
             <!-- Custom Amount Input (shown for partial withdrawal) -->
             <div class="form-group" id="customAmountGroup" style="display: none;">
                 <label class="form-label" for="withdrawAmount">Withdrawal Amount (USDC)</label>
@@ -139,24 +105,48 @@
                 </div>
             </div>
 
-            <!-- Withdrawal Preview -->
-            <div class="info-section" id="withdrawalPreview">
-                <h4 style="margin-bottom: 1rem; color: #374151;">Withdrawal Preview</h4>
-                <div class="info-row">
-                    <span class="info-label">Withdrawal Amount</span>
-                    <span class="info-value text-success" id="previewWithdrawAmount">$25.50</span>
+            <!-- Percentage Slider -->
+            <div class="info-section" id="percentageSlider">
+                <h4 style="margin-bottom: 1rem; color: #374151;">Select Withdrawal Percentage</h4>
+                
+                <!-- Percentage Display -->
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #4f46e5;" id="percentageDisplay">0%</div>
+                    <div style="font-size: 1.125rem; color: #374151; margin-top: 0.5rem;">
+                        Withdraw <span id="withdrawalAmountDisplay" style="font-weight: 600; color: #059669;">$0.00</span>
+                    </div>
                 </div>
+
+                <!-- Slider -->
+                <div style="margin-bottom: 1.5rem;">
+                    <input 
+                        type="range" 
+                        id="withdrawalSlider" 
+                        min="0" 
+                        max="100" 
+                        value="0" 
+                        step="1"
+                        style="width: 100%; height: 8px; background: linear-gradient(to right, #e5e7eb 0%, #4f46e5 0%); border-radius: 4px; outline: none; -webkit-appearance: none;"
+                        oninput="updateSliderValue()"
+                    >
+                </div>
+
+                <!-- Quick Percentage Buttons -->
+                <div style="display: flex; gap: 0.5rem; justify-content: space-between; margin-bottom: 1rem;">
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.875rem;" onclick="setPercentage(25)">25%</button>
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.875rem;" onclick="setPercentage(50)">50%</button>
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.875rem;" onclick="setPercentage(75)">75%</button>
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.875rem;" onclick="setPercentage(100)">100%</button>
+                </div>
+
+                <!-- Summary Info -->
                 <div class="info-row">
                     <span class="info-label">Remaining Position</span>
-                    <span class="info-value" id="previewRemainingPosition">$750.00</span>
+                    <span class="info-value" id="remainingPositionDisplay">$775.50</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">New USDC Balance</span>
-                    <span class="info-value" id="previewNewBalance">$550.00</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Future Annual Yield</span>
-                    <span class="info-value text-success" id="previewFutureYield">$61.50</span>
+                    <span class="info-value" id="newBalanceDisplay">$524.50</span>
                 </div>
             </div>
 
@@ -230,6 +220,57 @@
             border-color: #4f46e5;
             background: #f0f9ff;
         }
+        
+        /* Slider Styling */
+        #withdrawalSlider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        #withdrawalSlider::-webkit-slider-track {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        #withdrawalSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #withdrawalSlider::-moz-range-track {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 4px;
+            border: none;
+        }
+        
+        #withdrawalSlider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #withdrawalSlider:focus {
+            outline: none;
+        }
+        
+        #withdrawalSlider:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
     </style>
 
     <script>
@@ -291,72 +332,77 @@
             updateWithdrawalPreview();
         }
 
-        function updateWithdrawalPreview() {
-            const selectedType = document.querySelector('input[name="withdrawalType"]:checked').value;
-            let withdrawAmount = 0;
-
-            switch(selectedType) {
-                case 'yield':
-                    withdrawAmount = earnedYield;
-                    break;
-                case 'partial':
-                    withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
-                    break;
-                case 'full':
-                    withdrawAmount = totalPosition;
-                    break;
-            }
-
-            const remainingPosition = Math.max(0, totalPosition - withdrawAmount);
+        function updateSliderValue() {
+            const slider = document.getElementById('withdrawalSlider');
+            const percentage = parseInt(slider.value);
+            const withdrawAmount = (totalPosition * percentage) / 100;
+            
+            // Update percentage display
+            document.getElementById('percentageDisplay').textContent = `${percentage}%`;
+            document.getElementById('withdrawalAmountDisplay').textContent = `$${withdrawAmount.toFixed(2)}`;
+            
+            // Update summary info
+            const remainingPosition = totalPosition - withdrawAmount;
             const newBalance = currentBalance + withdrawAmount;
-            const futureYield = remainingPosition * apy;
-
-            // Update preview values
-            document.getElementById('previewWithdrawAmount').textContent = `$${withdrawAmount.toFixed(2)}`;
-            document.getElementById('previewRemainingPosition').textContent = `$${remainingPosition.toFixed(2)}`;
-            document.getElementById('previewNewBalance').textContent = `$${newBalance.toFixed(2)}`;
-            document.getElementById('previewFutureYield').textContent = `$${futureYield.toFixed(2)}`;
-
-            // Update button state for partial withdrawals
-            if (selectedType === 'partial') {
-                const confirmBtn = document.getElementById('confirmBtn');
-                const isValid = withdrawAmount > 0 && withdrawAmount <= totalPosition;
-                confirmBtn.disabled = !isValid;
-
-                // Update input validation styling
-                const amountInput = document.getElementById('withdrawAmount');
-                if (withdrawAmount > totalPosition) {
-                    amountInput.style.borderColor = '#ef4444';
-                } else {
-                    amountInput.style.borderColor = withdrawAmount > 0 ? '#10b981' : '#e5e7eb';
-                }
+            
+            document.getElementById('remainingPositionDisplay').textContent = `$${remainingPosition.toFixed(2)}`;
+            document.getElementById('newBalanceDisplay').textContent = `$${newBalance.toFixed(2)}`;
+            
+            // Update slider track color
+            const progress = (percentage / 100) * 100;
+            slider.style.background = `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${progress}%, #e5e7eb ${progress}%, #e5e7eb 100%)`;
+            
+            // Show/hide full withdrawal warning
+            const fullWithdrawalWarning = document.getElementById('fullWithdrawalWarning');
+            if (percentage === 100) {
+                fullWithdrawalWarning.style.display = 'block';
             } else {
-                document.getElementById('confirmBtn').disabled = false;
+                fullWithdrawalWarning.style.display = 'none';
+            }
+            
+            // Update confirm button state
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.disabled = percentage === 0;
+            
+            if (percentage === 0) {
+                confirmBtn.textContent = 'Select Amount to Withdraw';
+                confirmBtn.className = 'btn btn-secondary';
+            } else if (percentage === 100) {
+                confirmBtn.textContent = 'Confirm Full Withdrawal';
+                confirmBtn.className = 'btn btn-warning';
+            } else {
+                confirmBtn.textContent = `Withdraw ${percentage}% ($${withdrawAmount.toFixed(2)})`;
+                confirmBtn.className = 'btn btn-primary';
             }
         }
 
-        function confirmWithdrawal() {
-            const selectedType = document.querySelector('input[name="withdrawalType"]:checked').value;
-            let withdrawAmount = 0;
-            let confirmMessage = '';
+        function setPercentage(percentage) {
+            const slider = document.getElementById('withdrawalSlider');
+            slider.value = percentage;
+            updateSliderValue();
+        }
 
-            switch(selectedType) {
-                case 'yield':
-                    withdrawAmount = earnedYield;
-                    confirmMessage = `withdraw $${withdrawAmount.toFixed(2)} in earned yield`;
-                    break;
-                case 'partial':
-                    withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
-                    if (withdrawAmount <= 0 || withdrawAmount > totalPosition) {
-                        alert('Please enter a valid withdrawal amount.');
-                        return;
-                    }
-                    confirmMessage = `withdraw $${withdrawAmount.toFixed(2)} from your position`;
-                    break;
-                case 'full':
-                    withdrawAmount = totalPosition;
-                    confirmMessage = `withdraw your entire position of $${withdrawAmount.toFixed(2)}`;
-                    break;
+        function updateWithdrawalPreview() {
+            // This function is now replaced by updateSliderValue for the new slider interface
+            updateSliderValue();
+        }
+
+        function confirmWithdrawal() {
+            const slider = document.getElementById('withdrawalSlider');
+            const percentage = parseInt(slider.value);
+            
+            if (percentage === 0) {
+                alert('Please select a withdrawal percentage.');
+                return;
+            }
+            
+            const withdrawAmount = (totalPosition * percentage) / 100;
+            let confirmMessage = '';
+            
+            if (percentage === 100) {
+                confirmMessage = `withdraw your entire position of $${withdrawAmount.toFixed(2)} (100%)`;
+            } else {
+                confirmMessage = `withdraw ${percentage}% of your position ($${withdrawAmount.toFixed(2)})`;
             }
 
             if (!confirm(`Are you sure you want to ${confirmMessage}?`)) {
@@ -370,16 +416,16 @@
 
             // Simulate transaction processing
             setTimeout(() => {
-                alert(`Successfully withdrew $${withdrawAmount.toFixed(2)} from USDC Vault!`);
+                alert(`Successfully withdrew ${percentage}% ($${withdrawAmount.toFixed(2)}) from USDC Vault!`);
                 closeModal();
             }, 3000);
         }
 
         // Initialize on page load
-        updateWithdrawalType();
+        updateSliderValue();
 
-        // Handle Enter key in input
-        document.getElementById('withdrawAmount').addEventListener('keypress', function(e) {
+        // Handle Enter key to confirm withdrawal
+        document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !document.getElementById('confirmBtn').disabled) {
                 confirmWithdrawal();
             }

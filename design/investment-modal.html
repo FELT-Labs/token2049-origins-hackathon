@@ -108,14 +108,30 @@
                 </div>
             </div>
 
-            <!-- Quick Amount Buttons -->
+            <!-- Portfolio Percentage Slider -->
             <div class="form-group">
-                <label class="form-label">Quick Amounts</label>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(50)">$50</button>
-                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(100)">$100</button>
-                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(250)">$250</button>
-                    <button class="btn btn-secondary" style="flex: 1; min-width: 60px;" onclick="setQuickAmount(500)">$500</button>
+                <label class="form-label">Portfolio Percentage</label>
+                <div class="slider-container">
+                    <input 
+                        type="range" 
+                        id="portfolioSlider" 
+                        class="portfolio-slider" 
+                        min="0" 
+                        max="100" 
+                        value="0" 
+                        step="1"
+                        oninput="updateFromSlider()"
+                    >
+                    <div class="slider-labels">
+                        <span>0%</span>
+                        <span>25%</span>
+                        <span>50%</span>
+                        <span>75%</span>
+                        <span>100%</span>
+                    </div>
+                    <div class="slider-value">
+                        <span id="sliderValue">0%</span> of available balance
+                    </div>
                 </div>
             </div>
 
@@ -195,6 +211,65 @@
             background: #d1d5db;
             transform: none;
         }
+        
+        /* Portfolio Slider Styles */
+        .slider-container {
+            margin-top: 0.5rem;
+        }
+        
+        .portfolio-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        .portfolio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .portfolio-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .portfolio-slider::-webkit-slider-track {
+            background: linear-gradient(to right, #e5e7eb 0%, #4f46e5 var(--slider-progress, 0%), #e5e7eb var(--slider-progress, 0%));
+            height: 6px;
+            border-radius: 3px;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .slider-value {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-weight: 500;
+            color: #4f46e5;
+        }
     </style>
 
     <script>
@@ -208,12 +283,27 @@
 
         function setMaxAmount() {
             document.getElementById('investAmount').value = availableBalance.toFixed(2);
+            document.getElementById('portfolioSlider').value = 100;
+            document.getElementById('sliderValue').textContent = '100%';
+            document.getElementById('portfolioSlider').style.setProperty('--slider-progress', '100%');
             updateInvestmentPreview();
         }
 
-        function setQuickAmount(amount) {
-            const maxAmount = Math.min(amount, availableBalance);
-            document.getElementById('investAmount').value = maxAmount.toFixed(2);
+        function updateFromSlider() {
+            const slider = document.getElementById('portfolioSlider');
+            const percentage = parseInt(slider.value);
+            const amount = (availableBalance * percentage) / 100;
+            
+            // Update the input field
+            document.getElementById('investAmount').value = amount.toFixed(2);
+            
+            // Update slider value display
+            document.getElementById('sliderValue').textContent = `${percentage}%`;
+            
+            // Update slider progress for visual feedback
+            slider.style.setProperty('--slider-progress', `${percentage}%`);
+            
+            // Update investment preview
             updateInvestmentPreview();
         }
 
@@ -221,6 +311,13 @@
             const amountInput = document.getElementById('investAmount');
             const amount = parseFloat(amountInput.value) || 0;
             const confirmBtn = document.getElementById('confirmBtn');
+            const slider = document.getElementById('portfolioSlider');
+
+            // Update slider to match input amount
+            const percentage = Math.round((amount / availableBalance) * 100);
+            slider.value = Math.min(percentage, 100);
+            document.getElementById('sliderValue').textContent = `${slider.value}%`;
+            slider.style.setProperty('--slider-progress', `${slider.value}%`);
 
             // Update preview values
             document.getElementById('previewAmount').textContent = `$${amount.toFixed(2)}`;
