@@ -189,7 +189,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
               No Position to Withdraw
             </h3>
             <p className="text-gray-600 mb-6">
-              You don't have any position in this vault to withdraw. Please invest first to build a position.
+              You do not have any position in this vault to withdraw. Please invest first to build a position.
             </p>
             <button
               onClick={onClose}

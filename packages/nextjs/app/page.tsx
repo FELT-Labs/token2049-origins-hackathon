@@ -37,7 +37,7 @@ const Home: NextPage = () => {
             </>
           ) : (
             <div className="flex flex-col gap-8">
-              <CounterUI />
+              {/* <CounterUI /> */}
               <TokenBalances />
               <TokenVaults />
             </div>
