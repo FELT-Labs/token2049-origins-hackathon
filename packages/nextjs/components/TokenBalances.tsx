@@ -36,8 +36,9 @@ const TokenBalanceRow = ({ token }: TokenBalanceRowProps) => {
           {token.statusText}
         </div>
         <button 
-          className="px-5 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 cursor-pointer transition-all duration-200 hover:bg-gray-200 hover:-translate-y-0.5 min-w-[80px]" 
+          className={`px-5 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-900 cursor-pointer transition-all duration-200 hover:bg-gray-200 hover:-translate-y-0.5 min-w-[80px] ${token.statusText === "⏳ Coming Soon" ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           onClick={handleTopUp}
+          disabled={token.statusText === "⏳ Coming Soon"}
         >
           Top Up
         </button>

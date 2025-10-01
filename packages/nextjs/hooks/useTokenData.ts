@@ -46,7 +46,7 @@ const TOKEN_CONFIGS: TokenConfig[] = [
     address: "0x0000000000000000000000000000000000000000", // Sepolia ETH
     decimals: 18,
     status: "coming-soon",
-    statusText: "🔄 Coming Soon",
+    statusText: "⏳ Coming Soon",
     vaultId: "eth",
     emoji: "⚡",
     name: "ETH Vault",
@@ -61,7 +61,7 @@ const TOKEN_CONFIGS: TokenConfig[] = [
     address: "0x1B083D8584dd3e6Ff37d04a6e7e82b5F622f3985", // WBTC sepolia
     decimals: 18,
     status: "coming-soon",
-    statusText: "🔄 Coming Soon",
+    statusText: "⏳ Coming Soon",
     vaultId: "btc",
     emoji: "₿",
     name: "Bitcoin Vault",
