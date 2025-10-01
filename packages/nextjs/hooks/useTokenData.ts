@@ -28,7 +28,7 @@ export interface TokenConfig {
 const TOKEN_CONFIGS: TokenConfig[] = [
   {
     symbol: "USDC",
-    address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC mainnet
+    address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC sepolia
     decimals: 6,
     status: "eligible",
     statusText: "✅ Eligible for investing",
@@ -42,7 +42,7 @@ const TOKEN_CONFIGS: TokenConfig[] = [
   },
   {
     symbol: "ETH",
-    address: "0x0000000000000000000000000000000000000000", // Native ETH
+    address: "0x0000000000000000000000000000000000000000", // Sepolia ETH
     decimals: 18,
     status: "coming-soon",
     statusText: "🔄 Coming Soon",
@@ -56,9 +56,9 @@ const TOKEN_CONFIGS: TokenConfig[] = [
     targetYield: "~6%",
   },
   {
-    symbol: "BTC",
-    address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC mainnet
-    decimals: 8,
+    symbol: "WBTC",
+    address: "0x1B083D8584dd3e6Ff37d04a6e7e82b5F622f3985", // WBTC sepolia
+    decimals: 18,
     status: "coming-soon",
     statusText: "🔄 Coming Soon",
     vaultId: "btc",
