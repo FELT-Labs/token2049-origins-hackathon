@@ -3,8 +3,8 @@
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
-import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-alchemy";
+import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 import { useAccountType } from "~~/hooks/useAccountType";
 import { ContractName } from "~~/utils/scaffold-alchemy/contract";
 
@@ -15,6 +15,10 @@ export interface VaultData {
   userAssets: bigint;
   userAssetsFormatted: string;
   userAssetsUSD: string;
+  userDeposits: bigint;
+  userDepositsFormatted: string;
+  userDepositsUSD: string;
+  earnedYield: string;
 
   // Vault stats
   totalAssets: bigint;
@@ -78,22 +82,36 @@ export const useVault = ({ contractName, decimals = 6, usdRate = 1 }: UseVaultPa
     functionName: "asset",
   });
 
+  const { data: userDeposits, isLoading: depositsLoading } = useScaffoldReadContract({
+    contractName,
+    functionName: "userDeposits",
+    args: userAddress ? [userAddress] : undefined,
+    query: {
+      enabled: !!userAddress,
+    },
+  });
+
   return useMemo(() => {
-    const isLoading = sharesLoading || assetsLoading || totalAssetsLoading || assetLoading;
+    const isLoading = sharesLoading || assetsLoading || totalAssetsLoading || assetLoading || depositsLoading;
     const isError = false; // Could add error states if needed
 
     const shares = userShares || BigInt(0);
     const assets = userAssets || BigInt(0);
     const total = totalAssets || BigInt(0);
+    const deposits = userDeposits || BigInt(0);
 
     // Format values
     const sharesFormatted = formatUnits(shares, decimals);
     const assetsFormatted = formatUnits(assets, decimals);
     const totalAssetsFormatted = formatUnits(total, decimals);
+    const depositsFormatted = formatUnits(deposits, decimals);
 
     // Calculate USD values
     const assetsNum = parseFloat(assetsFormatted);
     const totalNum = parseFloat(totalAssetsFormatted);
+    const depositsNum = parseFloat(depositsFormatted);
+
+    const earnedYield = formatUnits(BigInt(total) - BigInt(deposits), decimals);
 
     return {
       // User position
@@ -102,6 +120,10 @@ export const useVault = ({ contractName, decimals = 6, usdRate = 1 }: UseVaultPa
       userAssets: assets,
       userAssetsFormatted: `$${assetsNum.toFixed(2)}`,
       userAssetsUSD: `$${(assetsNum * usdRate).toFixed(2)}`,
+      userDeposits: deposits,
+      userDepositsFormatted: `$${depositsNum.toFixed(2)}`,
+      userDepositsUSD: `$${(depositsNum * usdRate).toFixed(2)}`,
+      earnedYield: earnedYield,
 
       // Vault stats
       totalAssets: total,
@@ -113,5 +135,18 @@ export const useVault = ({ contractName, decimals = 6, usdRate = 1 }: UseVaultPa
       isLoading,
       isError,
     };
-  }, [userShares, userAssets, totalAssets, underlyingAsset, sharesLoading, assetsLoading, totalAssetsLoading, assetLoading, decimals, usdRate]);
+  }, [
+    userShares,
+    userAssets,
+    totalAssets,
+    underlyingAsset,
+    userDeposits,
+    sharesLoading,
+    assetsLoading,
+    totalAssetsLoading,
+    assetLoading,
+    depositsLoading,
+    decimals,
+    usdRate,
+  ]);
 };

@@ -362,4 +362,144 @@ describe("USDCVault", function () {
       expect(actualSharesBurned).to.equal(previewShares);
     });
   });
+
+  describe("User Deposits Tracking", function () {
+    it("Should track user deposits correctly on deposit", async function () {
+      const { vault, usdc, user1, DEPOSIT_AMOUNT } = await loadFixture(deployVaultWithUSDCFixture);
+
+      // Check initial state
+      expect(await vault.userDeposits(user1.address)).to.equal(0);
+
+      // Approve and deposit
+      await usdc.connect(user1).approve(await vault.getAddress(), DEPOSIT_AMOUNT);
+      await vault.connect(user1).deposit(DEPOSIT_AMOUNT, user1.address);
+
+      // Check userDeposits is updated
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT);
+    });
+
+    it("Should track user deposits correctly on mint", async function () {
+      const { vault, usdc, user1, DEPOSIT_AMOUNT } = await loadFixture(deployVaultWithUSDCFixture);
+
+      // Check initial state
+      expect(await vault.userDeposits(user1.address)).to.equal(0);
+
+      // Approve and mint shares
+      await usdc.connect(user1).approve(await vault.getAddress(), DEPOSIT_AMOUNT);
+      await vault.connect(user1).mint(DEPOSIT_AMOUNT, user1.address);
+
+      // Check userDeposits is updated
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT);
+    });
+
+    it("Should track multiple deposits from same user", async function () {
+      const { vault, usdc, user1 } = await loadFixture(deployVaultWithUSDCFixture);
+
+      const firstDeposit = ethers.parseUnits("500", 6);
+      const secondDeposit = ethers.parseUnits("300", 6);
+
+      // First deposit
+      await usdc.connect(user1).approve(await vault.getAddress(), firstDeposit);
+      await vault.connect(user1).deposit(firstDeposit, user1.address);
+      expect(await vault.userDeposits(user1.address)).to.equal(firstDeposit);
+
+      // Second deposit
+      await usdc.connect(user1).approve(await vault.getAddress(), secondDeposit);
+      await vault.connect(user1).deposit(secondDeposit, user1.address);
+      expect(await vault.userDeposits(user1.address)).to.equal(firstDeposit + secondDeposit);
+    });
+
+    it("Should track deposits separately for different users", async function () {
+      const { vault, usdc, user1, user2 } = await loadFixture(deployVaultWithUSDCFixture);
+
+      const user1Deposit = ethers.parseUnits("500", 6);
+      const user2Deposit = ethers.parseUnits("800", 6);
+
+      // User1 deposits
+      await usdc.connect(user1).approve(await vault.getAddress(), user1Deposit);
+      await vault.connect(user1).deposit(user1Deposit, user1.address);
+
+      // User2 deposits
+      await usdc.connect(user2).approve(await vault.getAddress(), user2Deposit);
+      await vault.connect(user2).deposit(user2Deposit, user2.address);
+
+      // Check separate tracking
+      expect(await vault.userDeposits(user1.address)).to.equal(user1Deposit);
+      expect(await vault.userDeposits(user2.address)).to.equal(user2Deposit);
+    });
+
+    it("Should reduce userDeposits proportionally on withdrawal", async function () {
+      const { vault, user1, DEPOSIT_AMOUNT } = await loadFixture(deployVaultWithDepositFixture);
+
+      // Initial state after fixture deposit
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT);
+
+      // Withdraw half
+      const withdrawAmount = DEPOSIT_AMOUNT / 2n;
+      await vault.connect(user1).withdraw(withdrawAmount, user1.address, user1.address);
+
+      // userDeposits should be reduced proportionally
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT / 2n);
+    });
+
+    it("Should reduce userDeposits proportionally on redeem", async function () {
+      const { vault, user1, DEPOSIT_AMOUNT } = await loadFixture(deployVaultWithDepositFixture);
+
+      // Initial state after fixture deposit
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT);
+      const initialShares = await vault.balanceOf(user1.address);
+
+      // Redeem half the shares
+      const redeemShares = initialShares / 2n;
+      await vault.connect(user1).redeem(redeemShares, user1.address, user1.address);
+
+      // userDeposits should be reduced proportionally
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT / 2n);
+    });
+
+    it("Should handle userDeposits correctly with yield", async function () {
+      const { vault, usdc, owner, user1, DEPOSIT_AMOUNT } = await loadFixture(deployVaultWithDepositFixture);
+
+      // Add yield to vault
+      const yieldAmount = ethers.parseUnits("200", 6); // 20% yield
+      await usdc.connect(owner).transfer(await vault.getAddress(), yieldAmount);
+
+      // Initial userDeposits should remain unchanged despite yield
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT);
+
+      // Withdraw half the shares
+      const userShares = await vault.balanceOf(user1.address);
+      const redeemShares = userShares / 2n;
+      await vault.connect(user1).redeem(redeemShares, user1.address, user1.address);
+
+      // userDeposits should be reduced by half (regardless of yield)
+      expect(await vault.userDeposits(user1.address)).to.equal(DEPOSIT_AMOUNT / 2n);
+    });
+
+    it("Should zero userDeposits when all shares are redeemed", async function () {
+      const { vault, user1 } = await loadFixture(deployVaultWithDepositFixture);
+
+      // Redeem all shares
+      const allShares = await vault.balanceOf(user1.address);
+      await vault.connect(user1).redeem(allShares, user1.address, user1.address);
+
+      // userDeposits should be zero
+      expect(await vault.userDeposits(user1.address)).to.equal(0);
+    });
+
+    it("Should handle edge case of over-reduction in userDeposits", async function () {
+      const { vault, usdc, owner, user1, DEPOSIT_AMOUNT } = await loadFixture(deployVaultWithDepositFixture);
+
+      // Add significant yield that could cause calculation issues
+      const largeYield = DEPOSIT_AMOUNT * 5n; // 500% yield
+      await usdc.connect(owner).transfer(await vault.getAddress(), largeYield);
+
+      // Try to withdraw more than original deposit
+      const withdrawAmount = DEPOSIT_AMOUNT * 2n; // Withdraw 2x original deposit
+      await vault.connect(user1).withdraw(withdrawAmount, user1.address, user1.address);
+
+      // userDeposits should not go negative, should be zero
+      expect(await vault.userDeposits(user1.address)).to.equal(0);
+    });
+  });
 });

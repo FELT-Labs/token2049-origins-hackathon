@@ -25,6 +25,28 @@ import {
 } from "@account-kit/infra";
 import { Chain } from "viem";
 
+export const celoSepolia: Chain = {
+  id: 11142220,
+  name: "Celo Sepolia",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Celo",
+    symbol: "CELO",
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://celo-sepolia.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Celoscan",
+      url: "https://sepolia.celoscan.io",
+    },
+  },
+  testnet: true,
+};
+
 export interface ChainInfo {
   chain: Chain;
   name: string;
@@ -57,6 +79,7 @@ export const allChains: ChainInfo[] = [
   { chain: opbnbTestnet, name: "opbnb-testnet" },
   { chain: inkSepolia, name: "ink-sepolia" },
   { chain: monadTestnet, name: "monad-testnet" },
+  { chain: celoSepolia, name: "celo-sepolia" },
 ];
 
 const chains = Object.fromEntries(allChains.map(({ chain }) => [chain.id, chain]));

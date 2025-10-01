@@ -96,6 +96,7 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
 
     // Calculate assets to withdraw (in USDC wei with 6 decimals)
     const assetsToWithdraw = parseUnits(withdrawAmount.toFixed(6), 6);
+    console.log("Assets to withdraw (in USDC wei):", assetsToWithdraw.toString());
 
     setIsLoading(true);
 

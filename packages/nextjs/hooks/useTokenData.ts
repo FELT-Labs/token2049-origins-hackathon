@@ -314,15 +314,17 @@ export const useTokenData = () => {
       let position;
       if (config.vaultId === "usdc") {
         const userAssets = parseFloat(usdcVaultData.userAssetsFormatted.replace(/[$,]/g, ""));
+        const earnedYield = parseFloat(usdcVaultData.earnedYield.replace(/[$,]/g, ""));
+        const deposits = parseFloat(usdcVaultData.userDepositsFormatted.replace(/[$,]/g, ""));
         // For now, we can't distinguish between principal and yield without tracking deposits
         // So we'll show total value as current value and assume no separate yield tracking
         position = {
           vaultId: config.vaultId,
-          invested: userAssets, // Total position value
-          earnedYield: 0, // Would need deposit tracking to calculate this
+          invested: deposits, // Total position value
+          earnedYield: earnedYield, // Would need deposit tracking to calculate this
           currentValue: userAssets,
-          investedFormatted: `$${userAssets.toFixed(2)}`,
-          earnedYieldFormatted: "$0.00",
+          investedFormatted: `$${deposits.toFixed(2)}`,
+          earnedYieldFormatted: `$${earnedYield.toFixed(2)}`,
           currentValueFormatted: `$${userAssets.toFixed(2)}`,
         };
       } else {

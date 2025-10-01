@@ -23,6 +23,9 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 contract USDCVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
+    // Deposits
+    mapping(address => uint256) public userDeposits;
+
     // --- Strategy management ---
     struct StrategyInfo {
         uint256 targetAllocation; // Basis points (10000 = 100%)
@@ -382,7 +385,14 @@ contract USDCVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
             if (!strategyInfo[strategy].isActive) continue;
 
             uint256 toWithdraw = needed - withdrawn;
-            uint256 maxWithdrawable = strategyInfo[strategy].totalDeposited;
+            // Get the actual maximum withdrawable amount from strategy (includes yield)
+            uint256 maxWithdrawable;
+            try ERC4626(strategy).maxWithdraw(address(this)) returns (uint256 max) {
+                maxWithdrawable = max;
+            } catch {
+                // Fallback to our tracked amount if strategy call fails
+                maxWithdrawable = strategyInfo[strategy].totalDeposited;
+            }
 
             if (toWithdraw > maxWithdrawable) {
                 toWithdraw = maxWithdrawable;
@@ -405,6 +415,10 @@ contract USDCVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         address receiver
     ) public override whenNotPaused nonReentrant returns (uint256 shares) {
         shares = super.deposit(assets, receiver);
+
+        // Track user deposits
+        userDeposits[msg.sender] += assets;
+
         _afterDeposit(assets, shares);
     }
 
@@ -413,6 +427,10 @@ contract USDCVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         address receiver
     ) public override whenNotPaused nonReentrant returns (uint256 assets) {
         assets = super.mint(shares, receiver);
+
+        // Track user deposits
+        userDeposits[msg.sender] += assets;
+
         _afterDeposit(assets, shares);
     }
 
@@ -423,6 +441,17 @@ contract USDCVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
         address owner_
     ) public override nonReentrant returns (uint256 shares) {
         _beforeWithdraw(assets, 0);
+
+        // Track user withdrawals - reduce their deposit amount proportionally
+        if (userDeposits[owner_] > 0) {
+            uint256 reduction = (userDeposits[owner_] * assets) / convertToAssets(balanceOf(owner_));
+            if (reduction > userDeposits[owner_]) {
+                userDeposits[owner_] = 0;
+            } else {
+                userDeposits[owner_] -= reduction;
+            }
+        }
+
         return super.withdraw(assets, receiver, owner_);
     }
 
@@ -433,6 +462,17 @@ contract USDCVault is ERC4626, Ownable, Pausable, ReentrancyGuard {
     ) public override nonReentrant returns (uint256 assets) {
         assets = super.previewRedeem(shares);
         _beforeWithdraw(assets, shares);
+
+        // Track user withdrawals - reduce their deposit amount proportionally
+        if (userDeposits[owner_] > 0 && balanceOf(owner_) > 0) {
+            uint256 reduction = (userDeposits[owner_] * shares) / balanceOf(owner_);
+            if (reduction > userDeposits[owner_]) {
+                userDeposits[owner_] = 0;
+            } else {
+                userDeposits[owner_] -= reduction;
+            }
+        }
+
         return super.redeem(shares, receiver, owner_);
     }
 

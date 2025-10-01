@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BugAntIcon } from "@heroicons/react/24/outline";
 import { ConnectButton } from "~~/components/scaffold-alchemy";
 
 type HeaderMenuLink = {
@@ -13,11 +12,11 @@ type HeaderMenuLink = {
 };
 
 export const menuLinks: HeaderMenuLink[] = [
-  {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
+  // {
+  //   label: "Debug Contracts",
+  //   href: "/debug",
+  //   icon: <BugAntIcon className="h-4 w-4" />,
+  // },
 ];
 
 export const HeaderMenuLinks = () => {
