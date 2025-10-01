@@ -267,6 +267,29 @@ export const useTokenData = () => {
     });
   };
 
+  // Mock function to simulate withdrawal (in practice, this would interact with smart contracts)
+  const simulateWithdrawal = (vaultId: string, percentage: number) => {
+    const vault = getVaultById(vaultId);
+    if (!vault) {
+      return Promise.reject(new Error(`Vault not found: ${vaultId}`));
+    }
+
+    const withdrawAmount = (vault.position.currentValue * percentage) / 100;
+    console.log(`Simulating withdrawal of ${percentage}% ($${withdrawAmount.toFixed(2)}) from ${vaultId} vault`);
+
+    // In a real app, this would:
+    // 1. Call smart contract to withdraw tokens
+    // 2. Update user's position
+    // 3. Refresh balances
+    return Promise.resolve({
+      success: true,
+      transactionHash: "0x456...",
+      withdrawnAmount: withdrawAmount,
+      remainingPosition: vault.position.currentValue - withdrawAmount,
+      percentage,
+    });
+  };
+
   return {
     tokenData,
     getTokenBySymbol,
@@ -275,6 +298,7 @@ export const useTokenData = () => {
     getTotalInvested,
     getTotalYield,
     simulateInvestment,
+    simulateWithdrawal,
     isConnected: !!address,
     userAddress: address,
   };

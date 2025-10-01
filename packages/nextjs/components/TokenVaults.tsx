@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import InvestmentModal from "./InvestmentModal";
+import WithdrawalModal from "./WithdrawalModal";
 import { useTokenData, type TokenData } from "~~/hooks/useTokenData";
 
 const TokenVaults = () => {
@@ -9,6 +10,8 @@ const TokenVaults = () => {
   const [selectedVault, setSelectedVault] = useState<string | null>(null);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
   const [selectedVaultForInvestment, setSelectedVaultForInvestment] = useState<TokenData | null>(null);
+  const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
+  const [selectedVaultForWithdrawal, setSelectedVaultForWithdrawal] = useState<TokenData | null>(null);
 
   const handleInvestClick = (vaultId: string) => {
     const vault = tokenData.find(v => v.vaultId === vaultId);
@@ -19,13 +22,21 @@ const TokenVaults = () => {
   };
 
   const handleWithdrawClick = (vaultId: string) => {
-    console.log(`Opening withdrawal modal for ${vaultId} vault`);
-    // TODO: Implement withdrawal modal
+    const vault = tokenData.find(v => v.vaultId === vaultId);
+    if (vault) {
+      setSelectedVaultForWithdrawal(vault);
+      setIsWithdrawalModalOpen(true);
+    }
   };
 
   const handleCloseInvestmentModal = () => {
     setIsInvestmentModalOpen(false);
     setSelectedVaultForInvestment(null);
+  };
+
+  const handleCloseWithdrawalModal = () => {
+    setIsWithdrawalModalOpen(false);
+    setSelectedVaultForWithdrawal(null);
   };
 
   const getRiskBadgeStyles = (riskLevel: string, status: string) => {
@@ -219,6 +230,13 @@ const TokenVaults = () => {
         isOpen={isInvestmentModalOpen}
         onClose={handleCloseInvestmentModal}
         vault={selectedVaultForInvestment}
+      />
+
+      {/* Withdrawal Modal */}
+      <WithdrawalModal
+        isOpen={isWithdrawalModalOpen}
+        onClose={handleCloseWithdrawalModal}
+        vault={selectedVaultForWithdrawal}
       />
     </div>
   );
