@@ -251,9 +251,9 @@ describe("USDCVault", function () {
 
       const excessiveAmount = DEPOSIT_AMOUNT + ethers.parseUnits("1", 6);
 
-      await expect(
-        vault.connect(user1).withdraw(excessiveAmount, user1.address, user1.address),
-      ).to.be.revertedWithCustomError(vault, "ERC4626ExceededMaxWithdraw");
+      await expect(vault.connect(user1).withdraw(excessiveAmount, user1.address, user1.address)).to.be.revertedWith(
+        "insufficient strategy liquidity",
+      );
     });
   });
 

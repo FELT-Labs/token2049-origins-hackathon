@@ -415,7 +415,7 @@ const deployedContracts = {
       },
     },
     MockYieldStrategy: {
-      address: "0x9b13f808fc2E28681a9DfECD0D79D78051588A29",
+      address: "0x925d9069FC55236D44640E2226b0aF43495573D3",
       abi: [
         {
           inputs: [
@@ -1542,7 +1542,7 @@ const deployedContracts = {
       },
     },
     USDCVault: {
-      address: "0x2CbF12C0cd1a4e2535De6F70C03d9E495abcE6ac",
+      address: "0xDBf3d503C29E00098234A295566076e8B700A885",
       abi: [
         {
           inputs: [
@@ -1863,6 +1863,44 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
+              name: "strategy",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "FundsDeployedToStrategy",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "strategy",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "FundsWithdrawnFromStrategy",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
               name: "previousOwner",
               type: "address",
             },
@@ -1898,8 +1936,58 @@ const deployedContracts = {
               name: "strategy",
               type: "address",
             },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "targetAllocation",
+              type: "uint256",
+            },
           ],
           name: "StrategyAdded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "strategy",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldAllocation",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newAllocation",
+              type: "uint256",
+            },
+          ],
+          name: "StrategyAllocationUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "strategy",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "int256",
+              name: "pnl",
+              type: "int256",
+            },
+          ],
+          name: "StrategyHarvested",
           type: "event",
         },
         {
@@ -1996,6 +2084,11 @@ const deployedContracts = {
               internalType: "address",
               name: "strategy",
               type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "targetAllocation",
+              type: "uint256",
             },
           ],
           name: "addStrategy",
@@ -2172,10 +2265,42 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "harvestAll",
+          outputs: [
+            {
+              internalType: "int256",
+              name: "totalPnl",
+              type: "int256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "address",
-              name: "",
+              name: "strategy",
+              type: "address",
+            },
+          ],
+          name: "harvestStrategy",
+          outputs: [
+            {
+              internalType: "int256",
+              name: "pnl",
+              type: "int256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "strategy",
               type: "address",
             },
           ],
@@ -2256,6 +2381,19 @@ const deployedContracts = {
             },
           ],
           name: "maxWithdraw",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "minLiquidity",
           outputs: [
             {
               internalType: "uint256",
@@ -2406,6 +2544,13 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "rebalance",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "uint256",
@@ -2468,6 +2613,35 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "strategyInfo",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "targetAllocation",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "totalDeposited",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "symbol",
           outputs: [
@@ -2475,6 +2649,19 @@ const deployedContracts = {
               internalType: "string",
               name: "",
               type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalAllocation",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -2568,6 +2755,24 @@ const deployedContracts = {
             },
           ],
           name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "strategy",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "newAllocation",
+              type: "uint256",
+            },
+          ],
+          name: "updateStrategyAllocation",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",

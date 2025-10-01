@@ -116,12 +116,12 @@ const deployVaultAndStrategy: DeployFunction = async function (hre: HardhatRunti
         // Use private key signer
         const deployerSigner = new hre.ethers.Wallet(privateKey, hre.ethers.provider);
         const vaultWithSigner = vault.connect(deployerSigner);
-        tx = await vaultWithSigner.addStrategy(strategyAddress);
+        tx = await vaultWithSigner.addStrategy(strategyAddress, 5000); // 50% allocation
       } else {
         // Use default signer
         const signers = await hre.ethers.getSigners();
         const vaultWithSigner = vault.connect(signers[0]);
-        tx = await vaultWithSigner.addStrategy(strategyAddress);
+        tx = await vaultWithSigner.addStrategy(strategyAddress, 5000); // 50% allocation
       }
 
       await tx.wait();
