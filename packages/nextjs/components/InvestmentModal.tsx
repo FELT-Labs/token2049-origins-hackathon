@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { parseUnits, formatUnits } from "viem";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { type TokenData } from "~~/hooks/useTokenData";
+import { useScaffoldReadContract, useScaffoldWriteContract, useDeployedContractInfo } from "~~/hooks/scaffold-alchemy";
+import { useAccountType } from "~~/hooks/useAccountType";
+import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 
 interface InvestmentModalProps {
   isOpen: boolean;
@@ -13,11 +18,40 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
   const [investAmount, setInvestAmount] = useState("");
   const [portfolioPercentage, setPortfolioPercentage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [txStep, setTxStep] = useState<"idle" | "approving" | "depositing">("idle");
+
+  // Get user address and account type
+  const { address } = useClient();
+  const accountTypeInfo = useAccountType();
+
+  // Get contract info
+  const { data: vaultInfo } = useDeployedContractInfo({ contractName: "USDCVault" });
+  const { data: usdcInfo } = useDeployedContractInfo({ contractName: "MockERC20" });
 
   // Parse available balance for calculations
-  const availableBalance = vault ? parseFloat(vault.balance.balanceUSD.replace(/[$,]/g, "")) : 0;
+  const availableBalance = vault ? parseFloat(vault.balance.balance) : 0;
   const currentPosition = vault ? vault.position.invested : 0;
   const apy = 0.082; // 8.2% APY
+
+  // AA transaction hooks
+  const { writeContractAsync: approveAA } = useScaffoldWriteContract({ contractName: "MockERC20" });
+  const { writeContractAsync: depositAA } = useScaffoldWriteContract({ contractName: "USDCVault" });
+
+  // EOA transaction hooks
+  const { writeContractAsync: writeEOA, data: eoaTxHash } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: txConfirmed } = useWaitForTransactionReceipt({
+    hash: eoaTxHash,
+  });
+
+  // Read current allowance
+  const { data: currentAllowance, refetch: refetchAllowance } = useScaffoldReadContract({
+    contractName: "MockERC20",
+    functionName: "allowance",
+    args: address && vaultInfo ? [address, vaultInfo.address] : undefined,
+    query: {
+      enabled: !!address && !!vaultInfo,
+    },
+  });
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -25,8 +59,23 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
       setInvestAmount("");
       setPortfolioPercentage(0);
       setIsLoading(false);
+      setTxStep("idle");
     }
   }, [isOpen]);
+
+  // Handle EOA transaction confirmation
+  useEffect(() => {
+    if (txConfirmed && txStep === "approving") {
+      console.log("✅ Approval confirmed, proceeding to deposit");
+      refetchAllowance();
+      handleDeposit();
+    } else if (txConfirmed && txStep === "depositing") {
+      console.log("✅ Deposit confirmed");
+      setIsLoading(false);
+      setTxStep("idle");
+      onClose();
+    }
+  }, [txConfirmed, txStep]);
 
   // Update slider when amount changes
   useEffect(() => {
@@ -52,22 +101,129 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
     setPortfolioPercentage(100);
   };
 
+  const handleApprove = async () => {
+    if (!vault || !vaultInfo || !usdcInfo) return;
+
+    const amount = parseFloat(investAmount);
+    const amountInWei = parseUnits(amount.toString(), 6); // USDC has 6 decimals
+
+    try {
+      setIsLoading(true);
+      setTxStep("approving");
+
+      if (accountTypeInfo.isAccountKit || accountTypeInfo.type === "ACCOUNT_KIT") {
+        console.log("🔐 Using Account Kit for approval");
+        await approveAA({
+          functionName: "approve",
+          args: [vaultInfo.address, amountInWei],
+        });
+        console.log("✅ AA Approval complete, proceeding to deposit");
+        await refetchAllowance();
+        await handleDeposit();
+      } else if (accountTypeInfo.isEOA && usdcInfo) {
+        console.log("👤 Using EOA wallet for approval");
+        const hash = await writeEOA({
+          address: usdcInfo.address,
+          abi: usdcInfo.abi,
+          functionName: "approve",
+          args: [vaultInfo.address, amountInWei],
+        });
+        console.log("Approval transaction hash:", hash);
+        // Will proceed to deposit in useEffect when txConfirmed
+      } else {
+        console.log("🔄 Fallback: Using Account Kit method for approval");
+        await approveAA({
+          functionName: "approve",
+          args: [vaultInfo.address, amountInWei],
+        });
+        await refetchAllowance();
+        await handleDeposit();
+      }
+    } catch (e) {
+      console.error("Error approving:", e);
+      setIsLoading(false);
+      setTxStep("idle");
+      alert("Failed to approve USDC. Please try again.");
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!vault || !vaultInfo || !address) return;
+
+    const amount = parseFloat(investAmount);
+    const amountInWei = parseUnits(amount.toString(), 6); // USDC has 6 decimals
+
+    try {
+      setIsLoading(true);
+      setTxStep("depositing");
+
+      if (accountTypeInfo.isAccountKit || accountTypeInfo.type === "ACCOUNT_KIT") {
+        console.log("🔐 Using Account Kit for deposit");
+        await depositAA({
+          functionName: "deposit",
+          args: [amountInWei, address],
+        });
+        console.log("✅ AA Deposit complete");
+        setIsLoading(false);
+        setTxStep("idle");
+        onClose();
+      } else if (accountTypeInfo.isEOA && vaultInfo) {
+        console.log("👤 Using EOA wallet for deposit");
+        const hash = await writeEOA({
+          address: vaultInfo.address,
+          abi: vaultInfo.abi,
+          functionName: "deposit",
+          args: [amountInWei, address],
+        });
+        console.log("Deposit transaction hash:", hash);
+        // Will close modal in useEffect when txConfirmed
+      } else {
+        console.log("🔄 Fallback: Using Account Kit method for deposit");
+        await depositAA({
+          functionName: "deposit",
+          args: [amountInWei, address],
+        });
+        setIsLoading(false);
+        setTxStep("idle");
+        onClose();
+      }
+    } catch (e) {
+      console.error("Error depositing:", e);
+      setIsLoading(false);
+      setTxStep("idle");
+      alert("Failed to deposit into vault. Please try again.");
+    }
+  };
+
   const handleConfirmInvestment = async () => {
     const amount = parseFloat(investAmount);
-    
+
+    console.log("amount", amount);
+    console.log("availableBalance", availableBalance);
+
     if (amount <= 0 || amount > availableBalance) {
       alert("Please enter a valid investment amount.");
       return;
     }
 
-    setIsLoading(true);
+    console.log("currentAllowance", currentAllowance);
+    console.log("vaultInfo", vaultInfo);
 
-    // Simulate transaction processing
-    setTimeout(() => {
-      alert(`Successfully invested $${amount.toFixed(2)} in ${vault?.name}!`);
-      setIsLoading(false);
-      onClose();
-    }, 3000);
+    if (currentAllowance === undefined || !vaultInfo) {
+      alert("Loading contract information...");
+      return;
+    }
+
+    const amountInWei = parseUnits(amount.toString(), 6);
+
+    // Check if approval is needed
+    if (currentAllowance < amountInWei) {
+      console.log("Approval needed. Current allowance:", formatUnits(currentAllowance, 6));
+      await handleApprove();
+    } else {
+      console.log("Sufficient allowance. Proceeding to deposit.");
+      await handleDeposit();
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -294,23 +450,30 @@ const InvestmentModal = ({ isOpen, onClose, vault }: InvestmentModalProps) => {
             </button>
             <button
               onClick={handleConfirmInvestment}
-              disabled={isConfirmDisabled || isLoading}
+              disabled={isConfirmDisabled || isLoading || isConfirming}
               className={`flex-1 font-medium py-3 px-6 rounded-xl transition-colors ${
-                isConfirmDisabled || isLoading
+                isConfirmDisabled || isLoading || isConfirming
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
             >
-              {isLoading ? "Processing..." : "Confirm Investment"}
+              {txStep === "approving" ? "Approving USDC..." : txStep === "depositing" ? "Depositing..." : isConfirming ? "Confirming..." : "Confirm Investment"}
             </button>
           </div>
 
           {/* Loading State */}
-          {isLoading && (
+          {(isLoading || isConfirming) && (
             <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
               <div className="bg-white rounded-xl p-8 text-center">
                 <div className="inline-block w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-                <div className="text-gray-600">Processing your investment...</div>
+                <div className="text-gray-600">
+                  {txStep === "approving" ? "Approving USDC spending..." : txStep === "depositing" ? "Depositing into vault..." : "Processing your investment..."}
+                </div>
+                {accountTypeInfo.isEOA && (
+                  <div className="text-sm text-gray-500 mt-2">
+                    Please confirm the transaction in your wallet
+                  </div>
+                )}
               </div>
             </div>
           )}

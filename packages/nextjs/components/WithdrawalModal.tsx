@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { type TokenData, useTokenData } from "~~/hooks/useTokenData";
+import { parseUnits } from "viem";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { type TokenData } from "~~/hooks/useTokenData";
+import { useScaffoldWriteContract, useDeployedContractInfo } from "~~/hooks/scaffold-alchemy";
+import { useAccountType } from "~~/hooks/useAccountType";
+import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
+import { useVault } from "~~/hooks/useVault";
 
 interface WithdrawalModalProps {
   isOpen: boolean;
@@ -12,15 +18,31 @@ interface WithdrawalModalProps {
 const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
   const [withdrawalPercentage, setWithdrawalPercentage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Use the token data hook for withdrawal operations
-  const { simulateWithdrawal } = useTokenData();
 
-  // Get position data from vault prop (which comes from useTokenData in parent)
-  const totalPosition = vault?.position.currentValue || 0;
+  // Get user address and account type
+  const { address } = useClient();
+  const accountTypeInfo = useAccountType();
+
+  // Get contract info
+  const { data: vaultInfo } = useDeployedContractInfo({ contractName: "USDCVault" });
+
+  // Get vault data for user position
+  const vaultData = useVault({ contractName: "USDCVault", decimals: 6, usdRate: 1 });
+
+  // AA transaction hooks
+  const { writeContractAsync: withdrawAA } = useScaffoldWriteContract({ contractName: "USDCVault" });
+
+  // EOA transaction hooks
+  const { writeContractAsync: writeEOA, data: eoaTxHash } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: txConfirmed } = useWaitForTransactionReceipt({
+    hash: eoaTxHash,
+  });
+
+  // Get position data from vault data hook
+  const totalPosition = parseFloat(vaultData.userAssetsFormatted.replace(/[$,]/g, ""));
   const principalAmount = vault?.position.invested || 0;
   const earnedYield = vault?.position.earnedYield || 0;
-  const currentBalance = vault ? parseFloat(vault.balance.balanceUSD.replace(/[$,]/g, "")) : 0;
+  const currentBalance = vault ? parseFloat(vault.balance.balance) : 0;
   const currentYield = vault?.currentYield || "0%";
 
   // Reset form when modal opens/closes
@@ -30,6 +52,15 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
       setIsLoading(false);
     }
   }, [isOpen]);
+
+  // Handle EOA transaction confirmation
+  useEffect(() => {
+    if (txConfirmed) {
+      console.log("✅ Withdrawal confirmed");
+      setIsLoading(false);
+      onClose();
+    }
+  }, [txConfirmed, onClose]);
 
   const handleSliderChange = (percentage: number) => {
     setWithdrawalPercentage(percentage);
@@ -45,14 +76,14 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
       return;
     }
 
-    if (!vault) {
+    if (!vault || !address || !vaultInfo) {
       alert("Vault information not available.");
       return;
     }
 
     const withdrawAmount = (totalPosition * withdrawalPercentage) / 100;
     let confirmMessage = '';
-    
+
     if (withdrawalPercentage === 100) {
       confirmMessage = `withdraw your entire position of $${withdrawAmount.toFixed(2)} (100%)`;
     } else {
@@ -63,22 +94,44 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
       return;
     }
 
+    // Calculate assets to withdraw (in USDC wei with 6 decimals)
+    const assetsToWithdraw = parseUnits(withdrawAmount.toFixed(6), 6);
+
     setIsLoading(true);
 
     try {
-      const result = await simulateWithdrawal(vault.vaultId, withdrawalPercentage);
-      
-      if (result.success) {
-        alert(`Successfully withdrew ${result.percentage}% ($${result.withdrawnAmount.toFixed(2)}) from ${vault.name}!`);
+      if (accountTypeInfo.isAccountKit || accountTypeInfo.type === "ACCOUNT_KIT") {
+        console.log("🔐 Using Account Kit for withdrawal");
+        await withdrawAA({
+          functionName: "withdraw",
+          args: [assetsToWithdraw, address, address],
+        });
+        console.log("✅ AA Withdrawal complete");
+        setIsLoading(false);
         onClose();
+      } else if (accountTypeInfo.isEOA && vaultInfo) {
+        console.log("👤 Using EOA wallet for withdrawal");
+        const hash = await writeEOA({
+          address: vaultInfo.address,
+          abi: vaultInfo.abi,
+          functionName: "withdraw",
+          args: [assetsToWithdraw, address, address],
+        });
+        console.log("Withdrawal transaction hash:", hash);
+        // Will close modal in useEffect when txConfirmed
       } else {
-        alert("Withdrawal failed. Please try again.");
+        console.log("🔄 Fallback: Using Account Kit method for withdrawal");
+        await withdrawAA({
+          functionName: "withdraw",
+          args: [assetsToWithdraw, address, address],
+        });
+        setIsLoading(false);
+        onClose();
       }
     } catch (error) {
       console.error("Withdrawal error:", error);
-      alert("Withdrawal failed. Please try again.");
-    } finally {
       setIsLoading(false);
+      alert("Withdrawal failed. Please try again.");
     }
   };
 
@@ -272,19 +325,24 @@ const WithdrawalModal = ({ isOpen, onClose, vault }: WithdrawalModalProps) => {
             </button>
             <button
               onClick={handleConfirmWithdrawal}
-              disabled={isConfirmDisabled || isLoading}
+              disabled={isConfirmDisabled || isLoading || isConfirming}
               className={`flex-1 font-medium py-3 px-6 rounded-xl transition-colors ${getButtonStyles()}`}
             >
-              {isLoading ? "Processing..." : getButtonText()}
+              {isLoading || isConfirming ? "Processing..." : getButtonText()}
             </button>
           </div>
 
           {/* Loading State */}
-          {isLoading && (
+          {(isLoading || isConfirming) && (
             <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
               <div className="bg-white rounded-xl p-8 text-center">
                 <div className="inline-block w-10 h-10 border-4 border-gray-200 border-t-yellow-600 rounded-full animate-spin mb-4"></div>
                 <div className="text-gray-600">Processing your withdrawal...</div>
+                {accountTypeInfo.isEOA && (
+                  <div className="text-sm text-gray-500 mt-2">
+                    Please confirm the transaction in your wallet
+                  </div>
+                )}
               </div>
             </div>
           )}

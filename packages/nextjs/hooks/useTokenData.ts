@@ -6,6 +6,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { useClient } from "~~/hooks/scaffold-alchemy/useClient";
 import { useWatchBalance } from "~~/hooks/scaffold-alchemy/useWatchBalance";
 import { useAccountType } from "~~/hooks/useAccountType";
+import { useVault } from "~~/hooks/useVault";
 
 // ERC20 ABI for balanceOf function
 const ERC20_ABI = parseAbi(["function balanceOf(address owner) view returns (uint256)"]);
@@ -29,7 +30,7 @@ export interface TokenConfig {
 const TOKEN_CONFIGS: TokenConfig[] = [
   {
     symbol: "USDC",
-    address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC sepolia
+    address: "0x62090CD0807c1d2E080f48f18F5893060b1a3C62", // mock USDC sepolia
     decimals: 6,
     status: "eligible",
     statusText: "✅ Eligible for investing",
@@ -300,30 +301,53 @@ export const useTokenData = () => {
   const ethBalance = useIndividualTokenBalance(TOKEN_CONFIGS[1], userAddress as `0x${string}` | undefined);
   const btcBalance = useIndividualTokenBalance(TOKEN_CONFIGS[2], userAddress as `0x${string}` | undefined);
 
+  // Get real vault data for USDC
+  const usdcVaultData = useVault({ contractName: "USDCVault", decimals: 6, usdRate: 1 });
+
   const tokenData = useMemo(() => {
     const balances = [usdcBalance, ethBalance, btcBalance];
 
     return TOKEN_CONFIGS.map((config, index): TokenData => {
-      const position = MOCK_POSITIONS[config.vaultId as keyof typeof MOCK_POSITIONS];
       const balance = balances[index];
+
+      // Use real vault data for USDC, mock data for others
+      let position;
+      if (config.vaultId === "usdc") {
+        const userAssets = parseFloat(usdcVaultData.userAssetsFormatted.replace(/[$,]/g, ""));
+        // For now, we can't distinguish between principal and yield without tracking deposits
+        // So we'll show total value as current value and assume no separate yield tracking
+        position = {
+          vaultId: config.vaultId,
+          invested: userAssets, // Total position value
+          earnedYield: 0, // Would need deposit tracking to calculate this
+          currentValue: userAssets,
+          investedFormatted: `$${userAssets.toFixed(2)}`,
+          earnedYieldFormatted: "$0.00",
+          currentValueFormatted: `$${userAssets.toFixed(2)}`,
+        };
+      } else {
+        // Use mock data for ETH and BTC (coming soon)
+        const mockPos = MOCK_POSITIONS[config.vaultId as keyof typeof MOCK_POSITIONS];
+        position = {
+          vaultId: config.vaultId,
+          invested: mockPos.invested,
+          earnedYield: mockPos.earnedYield,
+          currentValue: mockPos.currentValue,
+          investedFormatted: `$${mockPos.invested.toFixed(2)}`,
+          earnedYieldFormatted: mockPos.earnedYield > 0 ? `+$${mockPos.earnedYield.toFixed(2)}` : "$0.00",
+          currentValueFormatted: `$${mockPos.currentValue.toFixed(2)}`,
+        };
+      }
 
       return {
         ...config,
         balance,
-        position: {
-          vaultId: config.vaultId,
-          invested: position.invested,
-          earnedYield: position.earnedYield,
-          currentValue: position.currentValue,
-          investedFormatted: `$${position.invested.toFixed(2)}`,
-          earnedYieldFormatted: position.earnedYield > 0 ? `+$${position.earnedYield.toFixed(2)}` : "$0.00",
-          currentValueFormatted: `$${position.currentValue.toFixed(2)}`,
-        },
-        totalDeposits: config.vaultId === "usdc" ? "$4.2M" : "In Development",
+        position,
+        totalDeposits: config.vaultId === "usdc" ? usdcVaultData.totalAssetsFormatted : "In Development",
         vaultStatus: config.status === "eligible" ? "active" : "coming-soon",
       };
     });
-  }, [usdcBalance, ethBalance, btcBalance]);
+  }, [usdcBalance, ethBalance, btcBalance, usdcVaultData]);
 
   // Utility functions
   const getTokenBySymbol = (symbol: string) => {
