@@ -1,4 +1,4 @@
-![Yield Vault Banner](https://github.com/user-attachments/assets/your-banner-id)
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/86e774d0-6273-4d7e-9107-e3c2ab45f682" />
 
 # 🏦 Yield Vault
 
